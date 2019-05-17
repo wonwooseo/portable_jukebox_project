@@ -1,13 +1,13 @@
-#portable_jukebox_project
+# portable_jukebox_project
 Project to build a locally-hosted, portable jukebox application based on Django.
 
-##Features
+## Features
 - Clients add music to playlist, from youtube or file
 - Now playing page with cover art
 - Skip, re-add vote
     - Settings for minimum votes
 
-##Blueprint (views)
+## Blueprint (views)
 - [ ] /index
 - [ ] /host_player
 - [ ] /nowplaying
@@ -16,7 +16,7 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 - [ ] /add_file
 - [ ] /add_result
 
-##Blueprint (UCs)
+## Blueprint (UCs)
 - [ ] Host starts the server
 - [ ] Host enters session password
 - [ ] Client accesses server
