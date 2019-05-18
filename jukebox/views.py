@@ -11,6 +11,9 @@ def index(request):
     :param request: request object from client
     :return: rendered html
     """
+    valid_access = request.session.get('validated')
+    if valid_access is not None:
+        return redirect('now_playing')
     if not settings.USE_PASSWORD:
         return render(request, 'nowplaying.html')
     return render(request, 'index.html')
@@ -49,3 +52,17 @@ def now_playing(request):
         request.session.flush()
         return redirect('index')
     return render(request, 'nowplaying.html')
+
+
+def qrcode(request):
+    """
+    Shows QR code to access jukebox easily.
+    :param request: request object from client
+    :return: rendered html
+    """
+    valid_access = request.session.get('validated')
+    if valid_access is None:
+        request.session.flush()
+        return redirect('index')
+    context = {'address': settings.HOST_IP}  # add port in future?
+    return render(request, 'qrcode.html', context)

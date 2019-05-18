@@ -10,6 +10,7 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 ##Blueprint (views)
 - [x] /index
 - [x] /nowplaying
+- [x] /qrcode
 - [ ] /add
 - [ ] /add_youtube
 - [ ] /add_file
@@ -17,8 +18,9 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 
 ##Blueprint (UCs)
 - [x] Host starts the server
-- [ ] Client accesses server
-- [ ] Client enters session password
+- [x] Client accesses server
+- [x] Client enters session password
+- [x] Client clicks 'how to access..' button
 - [ ] Client clicks add button
     - [ ] Client clicks add from youtube
         - [ ] Client searches keyword

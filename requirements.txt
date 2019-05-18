@@ -1,3 +1,4 @@
 django>=2.2.1
 pyqrcode>=1.2
+pypng
 django-allow-cidr

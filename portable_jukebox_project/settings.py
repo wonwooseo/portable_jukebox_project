@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'jukebox'
+    'jukebox.apps.JukeboxConfig'
 ]
 
 MIDDLEWARE = [
@@ -129,6 +129,8 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Jukebox Settings
+# Enter host machine's IP address here.
+HOST_IP = '192.168.0.103'
 
 # Determines whether clients need password to access jukebox.
 USE_PASSWORD = True
