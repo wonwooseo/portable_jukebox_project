@@ -9,7 +9,6 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 
 ##Blueprint (views)
 - [ ] /index
-- [ ] /host_player
 - [ ] /nowplaying
 - [ ] /add
 - [ ] /add_youtube
@@ -18,7 +17,6 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 
 ##Blueprint (UCs)
 - [ ] Host starts the server
-- [ ] Host enters session password
 - [ ] Client accesses server
 - [ ] Client enters session password
 - [ ] Client clicks add button
@@ -34,7 +32,11 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 - [ ] Re-add condition is met
 
 ## Notes for personal use
-- Set session password at config file?
+- How clients find host?
+    - QR code?
+    - auto detection?
+- Set session password at config file
+    - option to not use password
 - django.channels / websockets for client-server communication
 - YouTube Search API
 - File transferring logic
