@@ -5,10 +5,16 @@
     <title>Portable Jukebox</title>
 </head>
 <body>
-    <form action="#">
-        Session Password: <br>
+    <form action="check_password" method="post">
+        {% csrf_token %}
+        Session key: <br>
         <input name="password" type="text">
-        <input type="submit">
+        <input type="submit"> <br>
+        {% if messages %}
+            {% for message in messages %}
+                <b> {{ message }}</b>
+            {% endfor %}
+        {% endif %}
     </form>
 </body>
 </html>

@@ -1,55 +1,51 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-import configparser
-
-config_dict = {}  # config options are constant, keep them on global dict
-
-
-def read_config():
-    parser = configparser.ConfigParser()
-    parser.read('config.ini')
-    # Set options from security section
-    try:
-        use_pw = parser.getboolean('SECURITY', 'USE_PASSWORD', fallback=True)
-        config_dict['use_password'] = use_pw
-    except ValueError:
-        config_dict['use_password'] = True
-
-    config_dict['password'] = parser.get('SECURITY', 'PASSWORD', fallback='')
-
-    try:
-        only_local = parser.getboolean('SECURITY', 'ONLY_LOCAL', fallback=True)
-        config_dict['local'] = only_local
-    except ValueError:
-        config_dict['local'] = True
-    # Set options from player section
-    try:
-        length = parser.getint('PLAYER', 'MAX_LENGTH', fallback=60)
-        config_dict['max_length'] = length
-    except ValueError:
-        config_dict['max_length'] = 60
-
-    try:
-        size = parser.getint('PLAYER', 'MAX_FILESIZE', fallback=20)
-        config_dict['max_size'] = size
-    except ValueError:
-        config_dict['max_size'] = 20
-
-    try:
-        skip = parser.getint('PLAYER', 'MIN_SKIP_VOTES', fallback=1)
-        config_dict['min_skip'] = skip
-    except ValueError:
-        config_dict['max_length'] = 1
-
-    try:
-        readd = parser.getint('PLAYER', 'MIN_READD_VOTES', fallback=1)
-        config_dict['min_readd'] = readd
-    except ValueError:
-        config_dict['min_readd'] = 1
+from django.shortcuts import redirect
+from django.contrib import messages
+from portable_jukebox_project import settings
 
 
 def index(request):
-    read_config()
-    if not config_dict['use_password']:
+    """
+    Shows auth page. If USE_PASSWORD is set to False in settings.py, auth is
+    skipped and client will see now playing page right away.
+    :param request: request object from client
+    :return: rendered html
+    """
+    if not settings.USE_PASSWORD:
         return render(request, 'nowplaying.html')
     return render(request, 'index.html')
+
+
+def check_password(request):
+    """
+    Checks if session key entered by client is right.
+    Key is temporary and only used for access control, so no need for hashing,
+    at least for now.
+    :param request: request object from client
+    :return: calls now_playing if match, index if mismatch
+    """
+    if settings.PASSWORD == '':
+        request.session['validated'] = True
+        return redirect('now_playing')
+
+    password = request.POST['password']
+    if password == settings.PASSWORD:
+        request.session['validated'] = True
+        return redirect('now_playing')
+    else:
+        messages.add_message(request, messages.INFO, 'Wrong Key!')
+        return redirect('index')
+
+
+def now_playing(request):
+    """
+    Shows now playing page to validated users.
+    If client made illegal access to this page, redirect to index.
+    :param request: request object from client
+    :return: rendered html
+    """
+    valid_access = request.session.get('validated')
+    if valid_access is None:
+        request.session.flush()
+        return redirect('index')
+    return render(request, 'nowplaying.html')

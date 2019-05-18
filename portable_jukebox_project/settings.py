@@ -25,7 +25,9 @@ SECRET_KEY = 'g0(z*3k#vhv!js)#f!_*obxn3z0gx#r(=yhbr6kh^^u2$5j#9%'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+ALLOWED_CIDR_NETS = ['192.168.0.1/8']
 
 
 # Application definition
@@ -48,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allow_cidr.middleware.AllowCIDRMiddleware'
 ]
 
 ROOT_URLCONF = 'portable_jukebox_project.urls'
@@ -119,3 +122,38 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Session related settings
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Jukebox Settings
+
+# Determines whether clients need password to access jukebox.
+USE_PASSWORD = True
+
+# Set session password here. Client will need this password to access jukebox.
+# If USE_PASSWORD is set to False, this is ignored.
+# If PASSWORD is left empty, jukebox will not ask for passwords.
+PASSWORD = '1234'
+
+# Limit access to jukebox only to clients on same network.
+# If set to False, jukebox will accept any clients.
+ONLY_LOCAL = True
+
+# Maximum length of music to be added from YouTube, in minutes.
+# Jukebox will assume invalid value as 60(Default).
+MAX_LENGTH = 60
+
+# Maximum size of music file to be uploaded from client, in MB.
+# Jukebox will assume invalid value as 20(Default).
+MAX_FILESIZE = 20
+
+# Minimum votes required to skip current music.
+# Jukebox will assume invalid value as 1(Default).
+MIN_SKIP_VOTE = 1
+
+# Minimum votes required to re-add current music to playlist.
+# Jukebox will assume invalid value as 1(Default).
+MIN_READD_VOTE = 1

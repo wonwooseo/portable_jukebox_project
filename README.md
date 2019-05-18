@@ -8,15 +8,15 @@ Project to build a locally-hosted, portable jukebox application based on Django.
     - Settings for minimum votes
 
 ##Blueprint (views)
-- [ ] /index
-- [ ] /nowplaying
+- [x] /index
+- [x] /nowplaying
 - [ ] /add
 - [ ] /add_youtube
 - [ ] /add_file
 - [ ] /add_result
 
 ##Blueprint (UCs)
-- [ ] Host starts the server
+- [x] Host starts the server
 - [ ] Client accesses server
 - [ ] Client enters session password
 - [ ] Client clicks add button
