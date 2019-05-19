@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add from YouTube</title>
+</head>
+<body>
+    {% csrf_token %}
+    <div id="youtube_search_form">
+        <form action="search_youtube" method="post">
+            <input type="text" placeholder="Search YouTube..">
+            <input type="submit" value="Search">
+        </form>
+    </div>
+    <div id="youtube_search_result">
+        {% if resultlist %}
+            <ul>
+                {% for title, link in resultlist %}
+                    <li><a href="/add_youtube_item?{{ link }}">{{ title }}</a></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</body>
+</html>
