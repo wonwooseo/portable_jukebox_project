@@ -8,14 +8,14 @@
     {% csrf_token %}
     <div id="youtube_search_form">
         <form action="search_youtube" method="post">
-            <input type="text" placeholder="Search YouTube..">
+            <input type="text" name="keyword" placeholder="Search YouTube.." required>
             <input type="submit" value="Search">
         </form>
     </div>
     <div id="youtube_search_result">
         {% if resultlist %}
             <ul>
-                {% for title, link in resultlist %}
+                {% for link, title in resultlist %}
                     <li><a href="/add_youtube_item?{{ link }}">{{ title }}</a></li>
                 {% endfor %}
             </ul>

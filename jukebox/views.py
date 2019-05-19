@@ -2,6 +2,11 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
 from portable_jukebox_project import settings
+import requests
+import logging
+
+
+logger = logging.getLogger()
 
 
 def index(request):
@@ -29,11 +34,15 @@ def check_password(request):
     """
     if settings.PASSWORD == '':
         request.session['validated'] = True
+        logger.info('Session login from {}'.
+                    format(request.META.get('REMOTE_ADDR')))
         return redirect('now_playing')
 
     password = request.POST['password']
     if password == settings.PASSWORD:
         request.session['validated'] = True
+        logger.info('Session login from {}'.
+                    format(request.META.get('REMOTE_ADDR')))
         return redirect('now_playing')
     else:
         messages.add_message(request, messages.INFO, 'Wrong Key!')
@@ -49,6 +58,8 @@ def now_playing(request):
     """
     valid_access = request.session.get('validated')
     if valid_access is None:
+        logger.info('Unvalidated access from {}'.
+                    format(request.META.get('REMOTE_ADDR')))
         request.session.flush()
         return redirect('index')
     return render(request, 'nowplaying.html')
@@ -62,7 +73,74 @@ def qrcode(request):
     """
     valid_access = request.session.get('validated')
     if valid_access is None:
+        logger.info('Unvalidated access from {}'.
+                    format(request.META.get('REMOTE_ADDR')))
         request.session.flush()
         return redirect('index')
     context = {'address': settings.HOST_IP}  # add port in future?
     return render(request, 'qrcode.html', context)
+
+
+def add(request):
+    """
+    Shows add music page. Client will choose to search YouTube or use local
+    cache / upload file.
+    :param request: request object from client
+    :return: rendered html
+    """
+    valid_access = request.session.get('validated')
+    if valid_access is None:
+        logger.info('Unvalidated access from {}'.
+                    format(request.META.get('REMOTE_ADDR')))
+        request.session.flush()
+        return redirect('index')
+    return render(request, 'add.html')
+
+
+def add_youtube(request):
+    """
+    Shows add from youtube page.
+    :param request: request object from client
+    :return: rendered html
+    """
+    valid_access = request.session.get('validated')
+    if valid_access is None:
+        logger.info('Unvalidated access from {}'.
+                    format(request.META.get('REMOTE_ADDR')))
+        request.session.flush()
+        return redirect('index')
+    return render(request, 'add_youtube.html')
+
+
+def search_youtube(request):
+    """
+    Searches keyword submitted by client using YouTube Data API and returns
+    result list. Tuples of video title, video id and thumbnail url are packed
+    into a list and passed to template.
+    :param request: request object from client
+    :return: redirect to add_youtube, with result list
+    """
+    valid_access = request.session.get('validated')
+    if valid_access is None:
+        logger.info('Unvalidated access from {}'.
+                    format(request.META.get('REMOTE_ADDR')))
+        request.session.flush()
+        return redirect('index')
+
+    # Calling YouTube Data API
+    resultlist = {}
+    api_key = 'AIzaSyB6J3gOdKJ4ZUefoABbHitfzWFzvcLUm3s'
+    api_url = 'https://www.googleapis.com/youtube/v3/' \
+              'search?part=snippet&type=video&videoEmbeddable=true&'
+    max_results = 10
+    keyword = request.POST['keyword']  # Never null; validated at form
+    api_url += 'maxResults={}&q={}&key={}'.format(max_results, keyword, api_key)
+    response = requests.get(api_url)  # API call
+    logger.info('YouTube API Call (Status={})'.format(response.status_code))
+    res_json = response.json()
+    for item in res_json['items']:
+        vname = item['snippet']['title']
+        vid = item['id']['videoId']
+        # thumb = item['snippet']['thumbnails']['default']['url']
+        resultlist[vid] = vname
+    return redirect('add_youtube', resultlist)
