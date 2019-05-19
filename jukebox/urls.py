@@ -8,5 +8,7 @@ urlpatterns = [
     path('nowplaying', views.now_playing, name='now_playing'),
     path('qrcode', views.qrcode, name='qrcode'),
     path('add', views.add, name='add'),
-    path('add_youtube', views.add_youtube, name='add_youtube')
+    path('add_youtube', views.add_youtube, name='add_youtube'),
+    path('search_youtube', views.search_youtube, name='search_youtube'),
+    path('add_youtube_item', views.add_youtube_item, name='add_youtube_item')
 ]

@@ -5,21 +5,29 @@
     <title>Add from YouTube</title>
 </head>
 <body>
-    {% csrf_token %}
     <div id="youtube_search_form">
         <form action="search_youtube" method="post">
+            {% csrf_token %}
             <input type="text" name="keyword" placeholder="Search YouTube.." required>
             <input type="submit" value="Search">
         </form>
     </div>
     <div id="youtube_search_result">
         {% if resultlist %}
+            <form id="enlist" method="post" action="/add_youtube_item">
+                {% csrf_token %}
+            </form>
             <ul>
-                {% for link, title in resultlist %}
-                    <li><a href="/add_youtube_item?{{ link }}">{{ title }}</a></li>
+                {% for item in resultlist %}
+                    <li>
+                        <button type="submit" form="enlist" name="id" value="{{ item.0 }}">
+                            {{ item.1 | safe }}
+                        </button>
+                    </li>
                 {% endfor %}
             </ul>
         {% endif %}
     </div>
+    <a href="/add">Go Back</a>
 </body>
 </html>

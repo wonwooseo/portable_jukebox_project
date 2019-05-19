@@ -11,19 +11,22 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 - [x] /index
 - [x] /nowplaying
 - [x] /qrcode
-- [ ] /add
-- [ ] /add_youtube
+- [x] /add
+- [x] /add_youtube
+- [x] /search_youtube
+- [x] /add_youtube_item
 - [ ] /add_file
-- [ ] /add_result
+- [x] /add_success
+- [x] /add_error
 
 ## Blueprint (UCs)
 - [x] Host starts the server
 - [x] Client accesses server
 - [x] Client enters session password
 - [x] Client clicks 'how to access..' button
-- [ ] Client clicks add button
-    - [ ] Client clicks add from youtube
-        - [ ] Client searches keyword
+- [x] Client clicks add button
+    - [x] Client clicks add from youtube
+        - [x] Client searches keyword
         - [ ] Client picks from results
     - [ ] Client clicks add from file
         - [ ] Client picks from cache
@@ -34,14 +37,10 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 - [ ] Re-add condition is met
 
 ## Notes for personal use
-- How clients find host?
-    - QR code?
-    - auto detection?
-- Set session password at config file
-    - option to not use password
+- File transferring logic in add from cache
+- how to check youtube video duration
+- embedding youtube player
+- how to signal end of song / skip
 - django.channels / websockets for client-server communication
-- YouTube Search API
-- File transferring logic
-- limit access to /host_player
-    - based on IP => REMOTE_ADDR
-    - set admin password?
+    - skip, re-add, playlist update?
+

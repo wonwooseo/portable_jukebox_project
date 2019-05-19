@@ -3,10 +3,31 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from portable_jukebox_project import settings
 import requests
-import logging
+import logging.config
 
-
-logger = logging.getLogger()
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': '[%(asctime)s][%(levelname)s] %(funcName)s: %(message)s'
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'console'
+        }
+    },
+    'loggers': {
+        '': {
+            'level': 'DEBUG',
+            'handlers': ['console']
+        }
+    }
+})
+logger = logging.getLogger(__name__)
 
 
 def index(request):
@@ -128,7 +149,8 @@ def search_youtube(request):
         return redirect('index')
 
     # Calling YouTube Data API
-    resultlist = {}
+    resultlist = []
+    # TODO: Should read api key from untracked file when repo goes public
     api_key = 'AIzaSyB6J3gOdKJ4ZUefoABbHitfzWFzvcLUm3s'
     api_url = 'https://www.googleapis.com/youtube/v3/' \
               'search?part=snippet&type=video&videoEmbeddable=true&'
@@ -139,8 +161,32 @@ def search_youtube(request):
     logger.info('YouTube API Call (Status={})'.format(response.status_code))
     res_json = response.json()
     for item in res_json['items']:
-        vname = item['snippet']['title']
+        vname = item['snippet']['title'][:80] + '...'
         vid = item['id']['videoId']
-        # thumb = item['snippet']['thumbnails']['default']['url']
-        resultlist[vid] = vname
-    return redirect('add_youtube', resultlist)
+        thumb = item['snippet']['thumbnails']['default']['url']
+        resultlist.append((vid, vname, thumb))
+    return render(request, 'add_youtube.html', {'resultlist': resultlist})
+
+
+def add_youtube_item(request):
+    """
+    Adds video specified by client to server playlist.
+    :param request: request object from client
+    :return: add_error.html on error, add_success on success
+    """
+    valid_access = request.session.get('validated')
+    if valid_access is None:
+        logger.info('Unvalidated access from {}'.
+                    format(request.META.get('REMOTE_ADDR')))
+        request.session.flush()
+        return redirect('index')
+
+    vid = request.POST.get('id', None)
+    if not vid:  # videoID is somehow missing
+        logger.error('Missing videoID in request')
+        return render(request, 'add_error.html')
+
+    # TODO: add to playlist
+    # TODO: check length limit (chain vIDs in 1 call at search_youtube?)
+    logger.info('Adding music from youtube(id={}) to playlist'.format(vid))
+    return render(request, 'add_success.html')
