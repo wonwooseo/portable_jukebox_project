@@ -14,15 +14,18 @@
     </div>
     <div id="youtube_search_result">
         {% if resultlist %}
-            <form id="enlist" method="post" action="/add_youtube_item">
-                {% csrf_token %}
-            </form>
             <ul>
                 {% for item in resultlist %}
                     <li>
-                        <button type="submit" form="enlist" name="id" value="{{ item.0 }}">
-                            {{ item.1 | safe }}
-                        </button>
+                        <div>
+                            <form id="enlist_{{ item.0 }}" method="post" action="/add_youtube_item">
+                                {% csrf_token %}
+                                <button type="submit" form="enlist_{{ item.0 }}" name="id" value="{{ item.0 }}">
+                                    {{ item.1 | safe }}
+                                </button>
+                                <input type="hidden" name="title" value="{{ item.1 | safe }}"/>
+                            </form>
+                        </div>
                     </li>
                 {% endfor %}
             </ul>

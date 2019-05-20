@@ -43,4 +43,6 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 - how to signal end of song / skip
 - django.channels / websockets for client-server communication
     - skip, re-add, playlist update?
-
+- database playlist
+    - in memory sqlite?
+    - use file, but reset on startup?

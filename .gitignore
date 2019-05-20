@@ -1,4 +1,5 @@
 .idea
 env
 *.sqlite3
+*.mrproper
 __pycache__

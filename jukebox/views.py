@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
 from portable_jukebox_project import settings
+from jukebox.models import PlaylistItem
 import requests
 import logging.config
 
@@ -161,7 +162,9 @@ def search_youtube(request):
     logger.info('YouTube API Call (Status={})'.format(response.status_code))
     res_json = response.json()
     for item in res_json['items']:
-        vname = item['snippet']['title'][:80] + '...'
+        vname = item['snippet']['title']
+        if len(vname) > 80:
+            vname = vname[:80] + '...'
         vid = item['id']['videoId']
         thumb = item['snippet']['thumbnails']['default']['url']
         resultlist.append((vid, vname, thumb))
@@ -182,11 +185,14 @@ def add_youtube_item(request):
         return redirect('index')
 
     vid = request.POST.get('id', None)
-    if not vid:  # videoID is somehow missing
-        logger.error('Missing videoID in request')
+    title = request.POST.get('title', None)
+    if not vid or not title:  # videoID is somehow missing
+        logger.error('Missing videoID/title in request')
         return render(request, 'add_error.html')
 
     # TODO: add to playlist
+    item = PlaylistItem(type='youtube', title=title, link=vid)
+    item.save()
     # TODO: check length limit (chain vIDs in 1 call at search_youtube?)
     logger.info('Adding music from youtube(id={}) to playlist'.format(vid))
     return render(request, 'add_success.html')
