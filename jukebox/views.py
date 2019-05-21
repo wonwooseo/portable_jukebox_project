@@ -6,28 +6,7 @@ from jukebox.models import PlaylistItem
 import requests
 import logging.config
 
-logging.config.dictConfig({
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'console': {
-            'format': '[%(asctime)s][%(levelname)s] %(funcName)s: %(message)s'
-        }
-    },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'console'
-        }
-    },
-    'loggers': {
-        '': {
-            'level': 'DEBUG',
-            'handlers': ['console']
-        }
-    }
-})
+logging.config.dictConfig(settings.LOGGER_CONFIG)
 logger = logging.getLogger(__name__)
 
 
@@ -78,10 +57,7 @@ def now_playing(request):
     :param request: request object from client
     :return: rendered html
     """
-    valid_access = request.session.get('validated')
-    if valid_access is None:
-        logger.info('Unvalidated access from {}'.
-                    format(request.META.get('REMOTE_ADDR')))
+    if not check_validated_access(request, 'now_playing'):
         request.session.flush()
         return redirect('index')
     return render(request, 'nowplaying.html')
@@ -93,10 +69,7 @@ def qrcode(request):
     :param request: request object from client
     :return: rendered html
     """
-    valid_access = request.session.get('validated')
-    if valid_access is None:
-        logger.info('Unvalidated access from {}'.
-                    format(request.META.get('REMOTE_ADDR')))
+    if not check_validated_access(request, 'qrcode'):
         request.session.flush()
         return redirect('index')
     context = {'address': settings.HOST_IP}  # add port in future?
@@ -110,10 +83,7 @@ def add(request):
     :param request: request object from client
     :return: rendered html
     """
-    valid_access = request.session.get('validated')
-    if valid_access is None:
-        logger.info('Unvalidated access from {}'.
-                    format(request.META.get('REMOTE_ADDR')))
+    if not check_validated_access(request, 'add'):
         request.session.flush()
         return redirect('index')
     return render(request, 'add.html')
@@ -125,10 +95,7 @@ def add_youtube(request):
     :param request: request object from client
     :return: rendered html
     """
-    valid_access = request.session.get('validated')
-    if valid_access is None:
-        logger.info('Unvalidated access from {}'.
-                    format(request.META.get('REMOTE_ADDR')))
+    if not check_validated_access(request, 'add_youtube'):
         request.session.flush()
         return redirect('index')
     return render(request, 'add_youtube.html')
@@ -142,10 +109,7 @@ def search_youtube(request):
     :param request: request object from client
     :return: redirect to add_youtube, with result list
     """
-    valid_access = request.session.get('validated')
-    if valid_access is None:
-        logger.info('Unvalidated access from {}'.
-                    format(request.META.get('REMOTE_ADDR')))
+    if not check_validated_access(request, 'search_youtube'):
         request.session.flush()
         return redirect('index')
 
@@ -168,6 +132,7 @@ def search_youtube(request):
         vid = item['id']['videoId']
         thumb = item['snippet']['thumbnails']['default']['url']
         resultlist.append((vid, vname, thumb))
+    # TODO: check length limit (chain vIDs in 1 call at search_youtube?)
     return render(request, 'add_youtube.html', {'resultlist': resultlist})
 
 
@@ -177,10 +142,7 @@ def add_youtube_item(request):
     :param request: request object from client
     :return: add_error.html on error, add_success on success
     """
-    valid_access = request.session.get('validated')
-    if valid_access is None:
-        logger.info('Unvalidated access from {}'.
-                    format(request.META.get('REMOTE_ADDR')))
+    if not check_validated_access(request, 'add_youtube_item'):
         request.session.flush()
         return redirect('index')
 
@@ -190,9 +152,35 @@ def add_youtube_item(request):
         logger.error('Missing videoID/title in request')
         return render(request, 'add_error.html')
 
-    # TODO: add to playlist
+    # add to playlist
     item = PlaylistItem(type='youtube', title=title, link=vid)
     item.save()
-    # TODO: check length limit (chain vIDs in 1 call at search_youtube?)
+    # TODO: signal /nowplaying that playlist has been updated
     logger.info('Adding music from youtube(id={}) to playlist'.format(vid))
     return render(request, 'add_success.html')
+
+
+def add_file(request):
+    if not check_validated_access(request, 'add_file'):
+        request.session.flush()
+        return redirect('index')
+    return render(request, 'add_file.html')
+
+
+def add_file_item(request):
+    return render(request, 'add_success.html')
+
+
+def check_validated_access(request, caller):
+    """
+    Extracted function to check if access is valid.
+    :param request: request object from client, passed by caller
+    :param caller: name of caller, in string
+    :return: True if valid access, False if not
+    """
+    valid_access = request.session.get('validated')
+    if valid_access is None:
+        logger.info('Unvalidated access to {} from {}'.
+                    format(caller, request.META.get('REMOTE_ADDR')))
+        return False
+    return True

@@ -129,6 +129,30 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
+# Config for logger
+LOGGER_CONFIG = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': '[%(asctime)s][%(levelname)s] %(funcName)s: %(message)s'
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'console'
+        }
+    },
+    'loggers': {
+        '': {
+            'level': 'DEBUG',
+            'handlers': ['console']
+        }
+    }
+}
+
 # Jukebox Settings
 # Enter host machine's IP address here.
 HOST_IP = '192.168.0.103'
