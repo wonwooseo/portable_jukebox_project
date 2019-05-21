@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add from cache / upload file</title>
+</head>
+<body>
+<div id="cache_file_list">
+        {% if resultlist %}
+            <ul>
+                {% for item in resultlist %}
+                    <li>
+                        <div>
+                            <form id="enlist_{{ item.1 }}" method="post" action="/add_file_item">
+                                {% csrf_token %}
+                                <button type="submit" form="enlist_{{ item.1 }}" name="filename" value="{{ item.0 | safe }}">
+                                    {{ item.1 | safe }}
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <a href="/add">Go Back</a>
+</body>
+</html>

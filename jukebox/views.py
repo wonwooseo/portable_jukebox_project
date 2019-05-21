@@ -3,8 +3,11 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from portable_jukebox_project import settings
 from jukebox.models import PlaylistItem
+from mutagen.easyid3 import EasyID3
+import mutagen
 import requests
 import logging.config
+import os
 
 logging.config.dictConfig(settings.LOGGER_CONFIG)
 logger = logging.getLogger(__name__)
@@ -161,10 +164,37 @@ def add_youtube_item(request):
 
 
 def add_file(request):
+    """
+    Shows add from cache / upload page. Passes list of music files in
+    :param request:
+    :return:
+    """
     if not check_validated_access(request, 'add_file'):
         request.session.flush()
         return redirect('index')
-    return render(request, 'add_file.html')
+
+    # Get list of music files in cache
+    try:
+        filelist = os.listdir('music_cache')
+    except FileNotFoundError:
+        logger.error("Failed to find music_cache directory")
+        return render(request, 'add_error.html')
+    # Pass list of (filename, title, artist, length) to template
+    resultlist = []
+    for file in filelist:
+        # open music file
+        music_fd = mutagen.File('music_cache/{}'.format(file))
+        if music_fd is None:  # Invalid file type
+            continue
+        # length info is given in seconds
+        len_div = divmod(music_fd.info.length, 60)
+        length = '{}m {}s'.format(int(len_div[0]), int(len_div[1]))
+        # Read tag information
+        tagdict = EasyID3('music_cache/{}'.format(file))
+        title = tagdict.get('title')
+        artist = tagdict.get('artist')
+        resultlist.append((file, title, artist, length))
+    return render(request, 'add_file.html', {'resultlist': resultlist})
 
 
 def add_file_item(request):
