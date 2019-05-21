@@ -11,10 +11,15 @@
                 {% for item in resultlist %}
                     <li>
                         <div>
-                            <form id="enlist_{{ item.1 }}" method="post" action="/add_file_item">
+                            <form id="enlist_{{ item.0 }}" method="post" action="/add_file_item">
                                 {% csrf_token %}
-                                <button type="submit" form="enlist_{{ item.1 }}" name="filename" value="{{ item.0 | safe }}">
-                                    {{ item.1 | safe }}
+                                {% if item.2 == '' %}
+                                    <b>{{ item.1 }}</b> ({{ item.3 }})
+                                {% else %}
+                                    <b>{{ item.1 }} - {{ item.2 }}</b> ({{ item.3 }})
+                                {% endif %}
+                                <button type="submit" form="enlist_{{ item.0 }}" name="filename" value="{{ item.0 }}">
+                                    Add this file
                                 </button>
                             </form>
                         </div>

@@ -2,12 +2,11 @@ from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib import messages
 from portable_jukebox_project import settings
-from jukebox.models import PlaylistItem
-from mutagen.easyid3 import EasyID3
+from jukebox.models import *
 import mutagen
+import stagger.id3
 import requests
 import logging.config
-import os
 
 logging.config.dictConfig(settings.LOGGER_CONFIG)
 logger = logging.getLogger(__name__)
@@ -22,8 +21,12 @@ def index(request):
     """
     valid_access = request.session.get('validated')
     if valid_access is not None:
+        logger.info('Session login from {}'.
+                    format(request.META.get('REMOTE_ADDR')))
         return redirect('now_playing')
     if not settings.USE_PASSWORD:
+        logger.info('Session login from {}'.
+                    format(request.META.get('REMOTE_ADDR')))
         return render(request, 'nowplaying.html')
     return render(request, 'index.html')
 
@@ -131,7 +134,7 @@ def search_youtube(request):
     for item in res_json['items']:
         vname = item['snippet']['title']
         if len(vname) > 80:
-            vname = vname[:80] + '...'
+            vname = vname[:77] + '...'
         vid = item['id']['videoId']
         thumb = item['snippet']['thumbnails']['default']['url']
         resultlist.append((vid, vname, thumb))
@@ -173,31 +176,30 @@ def add_file(request):
         request.session.flush()
         return redirect('index')
 
-    # Get list of music files in cache
-    try:
-        filelist = os.listdir('music_cache')
-    except FileNotFoundError:
-        logger.error("Failed to find music_cache directory")
-        return render(request, 'add_error.html')
-    # Pass list of (filename, title, artist, length) to template
     resultlist = []
-    for file in filelist:
-        # open music file
-        music_fd = mutagen.File('music_cache/{}'.format(file))
-        if music_fd is None:  # Invalid file type
-            continue
-        # length info is given in seconds
-        len_div = divmod(music_fd.info.length, 60)
-        length = '{}m {}s'.format(int(len_div[0]), int(len_div[1]))
-        # Read tag information
-        tagdict = EasyID3('music_cache/{}'.format(file))
-        title = tagdict.get('title')
-        artist = tagdict.get('artist')
-        resultlist.append((file, title, artist, length))
+    # Get list of files in cache
+    files_set = MusicCacheItem.objects.all()
+    # pass list of (id, title, artist, length) to template
+    for file in files_set:
+        packed_tag = (file.id, file.title, file.artist, file.length)
+        resultlist.append(packed_tag)
     return render(request, 'add_file.html', {'resultlist': resultlist})
 
 
 def add_file_item(request):
+    """
+    Adds chosen / uploaded file to playlist.
+    :param request: request from client
+    :return: add_error.html on error, add_success on success
+    """
+
+    """
+    album art retrieving code:
+    tag = stagger.read_tag(file)
+    tag.get(stagger.id3.PIC)[0].data
+    tags.get(stagger.id3.APIC)[0].data
+    if above 2 don't work, no album art
+    """
     return render(request, 'add_success.html')
 
 

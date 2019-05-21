@@ -4,3 +4,4 @@ pypng
 django-allow-cidr
 requests
 mutagen
+stagger
