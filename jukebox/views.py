@@ -192,7 +192,23 @@ def add_file_item(request):
     :param request: request from client
     :return: add_error.html on error, add_success on success
     """
-
+    request_type = request.POST.get('reqtype')
+    if request_type == 'add':
+        fid = request.POST.get('fileid')
+        # Find file with given id in DB
+        music = MusicCacheItem.objects.get(id=fid)
+        # Add to playlist
+        item = PlaylistItem(type='file', title=music.title, artist=music.artist,
+                            album=music.album, link=music.filename)
+        item.save()
+        logger.info('Adding music from cache(file={}) '
+                    'to playlist'.format(music.filename))
+    elif request_type == 'upload':
+        file = request.POST.get('musicfile')
+        
+    else:
+        logger.error('Missing request type in request')
+        return render(request, 'add_error.html')
     """
     album art retrieving code:
     tag = stagger.read_tag(file)

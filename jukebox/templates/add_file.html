@@ -5,7 +5,8 @@
     <title>Add from cache / upload file</title>
 </head>
 <body>
-<div id="cache_file_list">
+    <div id="cache_file_list">
+        <h3>Select file to add from cache:</h3>
         {% if resultlist %}
             <ul>
                 {% for item in resultlist %}
@@ -18,9 +19,10 @@
                                 {% else %}
                                     <b>{{ item.1 }} - {{ item.2 }}</b> ({{ item.3 }})
                                 {% endif %}
-                                <button type="submit" form="enlist_{{ item.0 }}" name="filename" value="{{ item.0 }}">
+                                <button type="submit" form="enlist_{{ item.0 }}" name="fileid" value="{{ item.0 }}">
                                     Add this file
                                 </button>
+                                <input type="hidden" name="reqtype" value="add">
                             </form>
                         </div>
                     </li>
@@ -28,6 +30,15 @@
             </ul>
         {% endif %}
     </div>
+    <div id="upload_form">
+        <h3>Or, upload your music file to cache.</h3>
+        <form id="upload_file" method="post" action="/add_file_item">
+            <input type="file" name="musicfile" required>
+            <input type="hidden" name="reqtype" value="upload">
+            <input type="submit" value="Upload">
+        </form>
+    </div>
+    <br>
     <a href="/add">Go Back</a>
 </body>
 </html>
