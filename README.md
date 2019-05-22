@@ -15,7 +15,8 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 - [x] /add_youtube
 - [x] /search_youtube
 - [x] /add_youtube_item
-- [ ] /add_file
+- [x] /add_file
+- [x] /add_file_item
 - [x] /add_success
 - [x] /add_error
 
@@ -28,7 +29,7 @@ Project to build a locally-hosted, portable jukebox application based on Django.
     - [x] Client clicks add from youtube
         - [x] Client searches keyword
         - [ ] Client picks from results
-    - [ ] Client clicks add from file
+    - [x] Client clicks add from file
         - [ ] Client picks from cache
         - [ ] Client uploads own file
 - [ ] Client clicks skip button
@@ -37,12 +38,21 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 - [ ] Re-add condition is met
 
 ## Notes for personal use
-- File transferring logic in add from cache
 - how to check youtube video duration
 - embedding youtube player
 - how to signal end of song / skip
 - django.channels / websockets for client-server communication
     - skip, re-add, playlist update?
-- database playlist
-    - in memory sqlite?
-    - use file, but reset on startup?
+- Album cover retrieving code
+    ```python
+    import stagger.id3
+    tag = stagger.read_tag('music_cache/a.mp3')  # get tags of music file
+    cover = None
+    with tag.get(stagger.id3.PIC) as ptag:
+        if ptag:
+            cover = ptag[0].data
+    with tag.get(stagger.id3.APIC) as aptag:
+        if aptag:
+            cover = aptag[0].data
+    # if cover left None, no album cover in tag
+    ```

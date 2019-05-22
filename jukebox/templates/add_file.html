@@ -32,8 +32,9 @@
     </div>
     <div id="upload_form">
         <h3>Or, upload your music file to cache.</h3>
-        <form id="upload_file" method="post" action="/add_file_item">
-            <input type="file" name="musicfile" required>
+        <form id="upload_file" method="post" action="/add_file_item" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="musicfile" accept="audio/*" required>
             <input type="hidden" name="reqtype" value="upload">
             <input type="submit" value="Upload">
         </form>

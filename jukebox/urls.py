@@ -11,5 +11,6 @@ urlpatterns = [
     path('add_youtube', views.add_youtube, name='add_youtube'),
     path('search_youtube', views.search_youtube, name='search_youtube'),
     path('add_youtube_item', views.add_youtube_item, name='add_youtube_item'),
-    path('add_file', views.add_file, name='add_file')
+    path('add_file', views.add_file, name='add_file'),
+    path('add_file_item', views.add_file_item, name='add_file_item')
 ]

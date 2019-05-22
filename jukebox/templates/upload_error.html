@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload failure</title>
+</head>
+<body>
+    <h2>Your file failed to upload..</h2>
+    <h3> {{ message }} </h3>
+    <h3>Try uploading different file here:</h3>
+    <form id="upload_file" method="post" action="/add_file_item" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="musicfile" accept="audio/*" required>
+        <input type="hidden" name="reqtype" value="upload">
+        <input type="submit" value="Upload">
+    </form>
+    <h3>Or, <a href="/add_file">go back and choose from music cache.</a></h3>
+</body>
+</html>

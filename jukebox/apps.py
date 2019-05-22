@@ -51,21 +51,28 @@ class JukeboxConfig(AppConfig):
         bulk_obj_list = []
         for file in filelist:
             # open music file
-            music_fd = mutagen.File('music_cache/{}'.format(file))
-            if music_fd is None:  # Invalid file type
+            try:
+                music_fd = mutagen.File('music_cache/{}'.format(file))
+                if music_fd is None:  # Invalid file type
+                    continue
+            except mutagen.MutagenError:
                 continue
             # length info is given in seconds
             len_div = divmod(music_fd.info.length, 60)
             length = '{}m {}s'.format(int(len_div[0]), int(len_div[1]))
             # Read tag information
-            tag = stagger.read_tag('music_cache/{}'.format(file))
-            title = tag.title
-            if title == '':
+            try:
+                tag = stagger.read_tag('music_cache/{}'.format(file))
+                title = tag.title
+                if title == '':
+                    title = file
+                if len(title) > 80:
+                    title = title[:77] + '...'
+                artist = tag.artist
+                album = tag.album
+            except stagger.NoTagError:
                 title = file
-            if len(title) > 80:
-                title = title[:77] + '...'
-            artist = tag.artist
-            album = tag.album
+                artist, album = '', ''
             item = MusicCacheItem(title=title, artist=artist, album=album,
                                   length=length, filename=file)
             bulk_obj_list.append(item)

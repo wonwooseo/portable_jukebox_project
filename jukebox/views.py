@@ -3,10 +3,11 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from portable_jukebox_project import settings
 from jukebox.models import *
+import logging.config
+import os
 import mutagen
 import stagger.id3
 import requests
-import logging.config
 
 logging.config.dictConfig(settings.LOGGER_CONFIG)
 logger = logging.getLogger(__name__)
@@ -168,9 +169,10 @@ def add_youtube_item(request):
 
 def add_file(request):
     """
-    Shows add from cache / upload page. Passes list of music files in
-    :param request:
-    :return:
+    Shows add from cache / upload page.
+    Passes list of music files in music cache.
+    :param request: request object from client
+    :return: add_file.html, with list of files in music cache
     """
     if not check_validated_access(request, 'add_file'):
         request.session.flush()
@@ -190,10 +192,16 @@ def add_file_item(request):
     """
     Adds chosen / uploaded file to playlist.
     :param request: request from client
-    :return: add_error.html on error, add_success on success
+    :return: add_success: added successfully
+             upload_error: error while handling uploaded file
+             add_error: Missing parts in request
     """
+    if not check_validated_access(request, 'add_file_item'):
+        request.session.flush()
+        return redirect('index')
+
     request_type = request.POST.get('reqtype')
-    if request_type == 'add':
+    if request_type == 'add':  # adding from cache
         fid = request.POST.get('fileid')
         # Find file with given id in DB
         music = MusicCacheItem.objects.get(id=fid)
@@ -203,19 +211,65 @@ def add_file_item(request):
         item.save()
         logger.info('Adding music from cache(file={}) '
                     'to playlist'.format(music.filename))
-    elif request_type == 'upload':
-        file = request.POST.get('musicfile')
-        
+
+    elif request_type == 'upload':  # uploading to cache
+        # Get file POSTed from request object
+        file = request.FILES.get('musicfile')
+        # Check duplicate filename
+        if MusicCacheItem.objects.filter(filename=file.name).exists():
+            logger.error('UPLOAD: Duplicate file (file={})'.format(file.name))
+            message = 'File with same name already exists in the cache :('
+            return render(request, 'upload_error.html', {'message': message})
+        # Write to music_cache first
+        with open('music_cache/{}'.format(file.name), 'wb') as fd:
+            if file.multiple_chunks():  # big files
+                for chunk in file.chunks():
+                    fd.write(chunk)
+            else:  # smaller files
+                fd.write(file.read())
+        # Check if file is valid
+        try:
+            music_fd = mutagen.File('music_cache/{}'.format(file.name))
+        except mutagen.MutagenError:  # Corrupted file
+            logger.error('UPLOAD: Corrupted file (file={})'.format(file.name))
+            os.remove('music_cache/{}'.format(file.name))
+            message = 'Looks like your file is corrupted :('
+            return render(request, 'upload_error.html', {'message': message})
+        if music_fd is None:  # Invalid file type
+            logger.error('UPLOAD: Unsupported file (file={})'.format(file.name))
+            os.remove('music_cache/{}'.format(file.name))
+            message = 'Looks like jukebox does not support this file :('
+            return render(request, 'upload_error.html', {'message': message})
+        # Get tag info and update cache map database
+        len_div = divmod(music_fd.info.length, 60)  # length given in seconds
+        length = '{}m {}s'.format(int(len_div[0]), int(len_div[1]))
+        try:
+            tag = stagger.read_tag('music_cache/{}'.format(file.name))
+            title = tag.title
+            if title == '':
+                title = file
+            if len(title) > 80:
+                title = title[:77] + '...'
+            artist = tag.artist
+            album = tag.album
+        except stagger.NoTagError:
+            title = file.name
+            artist, album = '', ''
+        cache_item = MusicCacheItem(title=title, artist=artist, album=album,
+                                    length=length, filename=file.name)
+        cache_item.save()
+        logger.info('Uploaded file added to cache (file={})'.format(file.name))
+        # Add file to playlist
+        plist_item = PlaylistItem(type='file', title=title, artist=artist,
+                                  album=album, link=file.name)
+        plist_item.save()
+        logger.info('Adding music from upload(file={}) '
+                    'to playlist'.format(file.name))
+
     else:
         logger.error('Missing request type in request')
         return render(request, 'add_error.html')
-    """
-    album art retrieving code:
-    tag = stagger.read_tag(file)
-    tag.get(stagger.id3.PIC)[0].data
-    tags.get(stagger.id3.APIC)[0].data
-    if above 2 don't work, no album art
-    """
+
     return render(request, 'add_success.html')
 
 
