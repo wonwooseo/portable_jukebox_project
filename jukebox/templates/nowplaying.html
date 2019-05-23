@@ -32,14 +32,23 @@
         console.error('Skip-add socket closed')
     };
     socket.onmessage = function(f) {
-        
+        let msg = JSON.parse(f.data);
+        let target = msg['target'];
+        if(target === 'skip') {
+            let count_elem = document.getElementById('skip_count');
+            let count = Number(count_elem.innerText);
+            count_elem.innerText = count + 1;
+        }
+        else if(target === 'readd') {
+            let count_elem = document.getElementById('readd_count');
+            let count = Number(count_elem.innerText);
+            count_elem.innerText = count + 1;
+        }
+        else console.error('Invalid target embedded in message');
     };
 
     let skipbtn_elem = document.getElementById('btn_skip');
     skipbtn_elem.onclick = function(f) {
-        let count_elem = document.getElementById('skip_count');
-        let count = Number(count_elem.innerText);
-        count_elem.innerText = count + 1;
         socket.send(JSON.stringify({
             'target': 'skip',
             'action': 'plus'
@@ -50,9 +59,6 @@
 
     let readdbtn_elem = document.getElementById('btn_readd');
     readdbtn_elem.onclick = function(f) {
-        let count_elem = document.getElementById('readd_count');
-        let count = Number(count_elem.innerText);
-        count_elem.innerText = count + 1;
         socket.send(JSON.stringify({
             'target': 'readd',
             'action': 'plus'
