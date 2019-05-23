@@ -33,14 +33,14 @@ ALLOWED_CIDR_NETS = ['192.168.0.1/8']
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
+    'jukebox.apps.JukeboxConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'pyqrcode',
-    'jukebox.apps.JukeboxConfig',
 ]
 
 MIDDLEWARE = [
@@ -128,6 +128,19 @@ STATIC_URL = '/static/'
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Channels settings
+ASGI_APPLICATION = 'portable_jukebox_project.routing.application'
+
+# For channel layers
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        }
+    }
+}
 
 # Config for logger
 LOGGER_CONFIG = {

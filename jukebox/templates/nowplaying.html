@@ -5,12 +5,60 @@
     <title>Now Playing</title>
 </head>
 <body>
-<h1>Title</h1>
-<h2>Artist</h2>
-<h2>Album</h2>
-<br>
-<h1>Playlist</h1>
-<a href="/qrcode">How to access jukebox?</a><br>
-<a href="/add">Add Music to Playlist</a>
+    <h1>Title</h1>
+    <h2>Artist</h2>
+    <h2>Album</h2>
+    <div id="skip_area">
+        <button id="btn_skip" class="toggle">Vote to Skip</button>
+        <span id="skip_count">0</span>
+    </div>
+    <div id="readd_area">
+        <button id="btn_readd" class="toggle">Vote to Re-add</button>
+        <span id="readd_count">0</span>
+    </div>
+    <br>
+    <h1>Playlist</h1>
+    <a href="/qrcode">How to access jukebox?</a><br>
+    <a href="/add">Add Music to Playlist</a>
 </body>
+<script>
+    let socket = new WebSocket(
+        'ws://' + window.location.host + '/ws/skipadd/'
+    );
+    socket.onopen = function(f) {
+        console.info('Opened skip-add socket')
+    };
+    socket.onclose = function(f) {
+        console.error('Skip-add socket closed')
+    };
+    socket.onmessage = function(f) {
+        
+    };
+
+    let skipbtn_elem = document.getElementById('btn_skip');
+    skipbtn_elem.onclick = function(f) {
+        let count_elem = document.getElementById('skip_count');
+        let count = Number(count_elem.innerText);
+        count_elem.innerText = count + 1;
+        socket.send(JSON.stringify({
+            'target': 'skip',
+            'action': 'plus'
+        }));
+        skipbtn_elem.innerText = 'Voted for Skip';
+        skipbtn_elem.disabled = true;
+    };
+
+    let readdbtn_elem = document.getElementById('btn_readd');
+    readdbtn_elem.onclick = function(f) {
+        let count_elem = document.getElementById('readd_count');
+        let count = Number(count_elem.innerText);
+        count_elem.innerText = count + 1;
+        socket.send(JSON.stringify({
+            'target': 'readd',
+            'action': 'plus'
+        }));
+        readdbtn_elem.innerText = 'Voted for Re-add';
+        readdbtn_elem.disabled = true;
+    };
+</script>
 </html>

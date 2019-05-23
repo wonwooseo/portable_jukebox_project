@@ -5,3 +5,6 @@ django-allow-cidr
 requests
 mutagen
 stagger
+channels
+channels-redis
+pypiwin32
