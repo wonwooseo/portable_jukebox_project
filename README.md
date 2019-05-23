@@ -41,8 +41,9 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 - how to check youtube video duration
 - embedding youtube player
 - how to signal end of song / skip
-- django.channels / websockets for client-server communication
-    - skip, re-add, playlist update?
+- channels use docker/redis for broadcast backend..
+    - find other lightweight options (for production)
+    - or manually keep channel names in consumers.py
 - Album cover retrieving code
     ```python
     import stagger.id3

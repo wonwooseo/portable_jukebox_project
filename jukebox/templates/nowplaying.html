@@ -26,23 +26,32 @@
         'ws://' + window.location.host + '/ws/skipadd/'
     );
     socket.onopen = function(f) {
-        console.info('Opened skip-add socket')
+        console.info('Opened skip-add socket');
+        socket.send(JSON.stringify({
+            'fetch': 'request',
+        }));
     };
     socket.onclose = function(f) {
-        console.error('Skip-add socket closed')
+        console.error('Skip-add socket closed');
     };
     socket.onmessage = function(f) {
         let msg = JSON.parse(f.data);
         let target = msg['target'];
         if(target === 'skip') {
             let count_elem = document.getElementById('skip_count');
-            let count = Number(count_elem.innerText);
-            count_elem.innerText = count + 1;
+            // let count = Number(count_elem.innerText);
+            count_elem.innerText = msg['count'];
         }
         else if(target === 'readd') {
             let count_elem = document.getElementById('readd_count');
-            let count = Number(count_elem.innerText);
-            count_elem.innerText = count + 1;
+            // let count = Number(count_elem.innerText);
+            count_elem.innerText = msg['count'];
+        }
+        else if(target === 'fetch') {
+            let scount_elem = document.getElementById('skip_count');
+            let rcount_elem = document.getElementById('readd_count');
+            scount_elem.innerText = msg['skip'];
+            rcount_elem.innerText = msg['readd'];
         }
         else console.error('Invalid target embedded in message');
     };
