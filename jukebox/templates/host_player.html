@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Now Playing (Host)</title>
+</head>
+<body>
+    <div id="music_info">
+        <div id="album_cover">
+
+        </div>
+        <h1>Title</h1>
+        <h2>Artist</h2>
+        <h2>Album</h2>
+    </div>
+    <div id="skip_area">
+        <span id="skip_label" ><b>Votes for Skip</b></span>
+        <span id="skip_count">0</span>
+        <span>/ 5</span>
+    </div>
+    <div id="readd_area">
+        <span id="readd_label"><b>Votes for Re-add</b></span>
+        <span id="readd_count">0</span>
+        <span>/ 5</span>
+    </div>
+    <br>
+    <h1>Playlist</h1>
+    <a href="/qrcode">How to access jukebox?</a><br>
+</body>
+<script>
+    let socket = new WebSocket(
+        'ws://' + window.location.host + '/ws/skipadd/'
+    );
+    socket.onopen = function(f) {
+        console.info('Opened skip-add socket');
+        socket.send(JSON.stringify({
+            'fetch': 'request',
+        }));
+    };
+    socket.onclose = function(f) {
+        console.error('Skip-add socket closed');
+    };
+    socket.onmessage = function(f) {
+        let msg = JSON.parse(f.data);
+        let target = msg['target'];
+        if(target === 'skip') {
+            let count_elem = document.getElementById('skip_count');
+            // let count = Number(count_elem.innerText);
+            count_elem.innerText = msg['count'];
+        }
+        else if(target === 'readd') {
+            let count_elem = document.getElementById('readd_count');
+            // let count = Number(count_elem.innerText);
+            count_elem.innerText = msg['count'];
+        }
+        else if(target === 'fetch') {
+            let scount_elem = document.getElementById('skip_count');
+            let rcount_elem = document.getElementById('readd_count');
+            scount_elem.innerText = msg['skip'];
+            rcount_elem.innerText = msg['readd'];
+        }
+        else console.error('Invalid target embedded in message');
+    };
+</script>
+</html>

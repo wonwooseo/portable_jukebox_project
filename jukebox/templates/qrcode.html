@@ -8,9 +8,9 @@
 <body>
     <h1>How to access jukebox?</h1>
     <h2>Scan following QR code:</h2>
-    <img src="{% static 'qr.png' %}" alt="QR Code">
+    <img src="{% static 'img/qr.png' %}" alt="QR Code">
     <h2>Or, use following URL</h2>
     <h3><a href="http://{{ address }}:8000">http://{{ address }}:8000</a></h3><br>
-    <a href="/nowplaying">Back</a>
+    <a href="javascript:history.back()">Back</a>
 </body>
 </html>

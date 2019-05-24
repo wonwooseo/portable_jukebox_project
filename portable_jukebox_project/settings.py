@@ -170,10 +170,13 @@ LOGGER_CONFIG = {
 # Enter host machine's IP address here.
 HOST_IP = '192.168.0.103'
 
+# Key that host(admin) will use to access host-specific features.
+HOST_PASSWORD = 'admin'
+
 # Determines whether clients need password to access jukebox.
 USE_PASSWORD = True
 
-# Set session password here. Client will need this password to access jukebox.
+# Key that clients will use to access jukebox.
 # If USE_PASSWORD is set to False, this is ignored.
 # If PASSWORD is left empty, jukebox will not ask for passwords.
 PASSWORD = '1234'

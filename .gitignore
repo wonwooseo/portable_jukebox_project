@@ -3,4 +3,4 @@ env
 *.sqlite3
 *.mrproper
 __pycache__
-music_cache/*
+jukebox/static/img/qr.png
