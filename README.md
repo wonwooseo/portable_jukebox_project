@@ -57,3 +57,5 @@ Project to build a locally-hosted, portable jukebox application based on Django.
             cover = aptag[0].data
     # if cover left None, no album cover in tag
     ```
+- Configure host IP automatically
+- Prevent duplicate votes

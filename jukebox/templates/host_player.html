@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Now Playing (Host)</title>
+    {% load static %}
 </head>
 <body>
     <div id="music_info">
@@ -25,7 +26,11 @@
     </div>
     <br>
     <h1>Playlist</h1>
-    <a href="/qrcode">How to access jukebox?</a><br>
+    <h1>How to access jukebox?</h1>
+    <h2>Scan following QR code:</h2>
+    <img src="{% static 'img/qr.png' %}" alt="QR Code">
+    <h2>Or, use following URL</h2>
+    <h3><a href="http://{{ address }}:8000">http://{{ address }}:8000</a></h3><br>
 </body>
 <script>
     let socket = new WebSocket(

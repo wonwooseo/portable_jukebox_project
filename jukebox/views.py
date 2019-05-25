@@ -20,6 +20,11 @@ def index(request):
     :param request: request object from client
     :return: rendered html
     """
+    # Access from host machine
+    if request.META.get('REMOTE_ADDR') == '127.0.0.1':  # is this safe?
+        return render(request, 'host_player.html',
+                      {'address': settings.HOST_IP})
+    # Access from other machines
     valid_access = request.session.get('validated')
     if valid_access is not None:
         logger.info('Session login from {}'.
