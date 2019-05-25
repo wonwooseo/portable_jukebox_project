@@ -41,18 +41,19 @@ class JukeboxConfig(AppConfig):
         from jukebox.models import MusicCacheItem
         # Get list of music files in cache
         try:
-            filelist = os.listdir('music_cache')
+            filelist = os.listdir('jukebox/static/music_cache')
         except FileNotFoundError:
             logger.error("Failed to find music_cache directory")
-            os.mkdir('music_cache')
-            logger.info("Created music_cache in project root")
+            os.mkdir('jukebox/static/music_cache')
+            logger.info("Created music_cache in jukebox/static")
             return
         # save title, artist, album, length, filename to db
         bulk_obj_list = []
         for file in filelist:
             # open music file
             try:
-                music_fd = mutagen.File('music_cache/{}'.format(file))
+                music_fd = mutagen.File('jukebox/static/music_cache/{}'
+                                        .format(file))
                 if music_fd is None:  # Invalid file type
                     continue
             except mutagen.MutagenError:
@@ -62,7 +63,8 @@ class JukeboxConfig(AppConfig):
             length = '{}m {}s'.format(int(len_div[0]), int(len_div[1]))
             # Read tag information
             try:
-                tag = stagger.read_tag('music_cache/{}'.format(file))
+                tag = stagger.read_tag('jukebox/static/music_cache/{}'
+                                       .format(file))
                 title = tag.title
                 if title == '':
                     title = file

@@ -22,6 +22,10 @@
     <a href="/add">Add Music to Playlist</a>
 </body>
 <script>
+    /*
+     * TODO: Better extract script to separate file
+     * TODO: Use switch-case for 'target'
+     */
     let socket = new WebSocket(
         'ws://' + window.location.host + '/ws/skipadd/'
     );
@@ -52,6 +56,12 @@
             let rcount_elem = document.getElementById('readd_count');
             scount_elem.innerText = msg['skip'];
             rcount_elem.innerText = msg['readd'];
+        }
+        else if(target === 'notplaying') {
+            let skipbtn_elem = document.getElementById('btn_skip');
+            skipbtn_elem.disabled = true;
+            let readdbtn_elem = document.getElementById('btn_readd');
+            readdbtn_elem.disabled = true;
         }
         else console.error('Invalid target embedded in message');
     };

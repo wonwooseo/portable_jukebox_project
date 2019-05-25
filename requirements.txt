@@ -7,4 +7,5 @@ mutagen
 stagger
 channels
 channels-redis
+asgiref>=3.1.2
 pypiwin32

@@ -3,11 +3,15 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from portable_jukebox_project import settings
 from jukebox.models import *
+from jukebox.consumers import ConsumerUtil
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 import logging.config
 import os
 import mutagen
 import stagger.id3
 import requests
+import json
 
 logging.config.dictConfig(settings.LOGGER_CONFIG)
 logger = logging.getLogger(__name__)
@@ -23,7 +27,9 @@ def index(request):
     # Access from host machine
     if request.META.get('REMOTE_ADDR') == '127.0.0.1':  # is this safe?
         return render(request, 'host_player.html',
-                      {'address': settings.HOST_IP})
+                      {'address': settings.HOST_IP,
+                       'skip_threshold': settings.MIN_SKIP_VOTE,
+                       'readd_threshold': settings.MIN_READD_VOTE})
     # Access from other machines
     valid_access = request.session.get('validated')
     if valid_access is not None:
@@ -166,8 +172,20 @@ def add_youtube_item(request):
 
     # add to playlist
     item = PlaylistItem(type='youtube', title=title, link=vid)
-    item.save()
-    # TODO: signal /nowplaying that playlist has been updated
+    if not PlaylistItem.objects.filter(playing=True).exists():
+        item.playing = True
+        item.save()
+        # signal /nowplaying that playlist has been updated
+        ConsumerUtil.set_np_idx(item.pk)
+        channel = get_channel_layer()
+        async_to_sync(channel.group_send)('music', {
+                        'type': 'music.event',
+                        'text': json.dumps({
+                            'target': 'skip',  # will make client refresh
+                        }),
+                    })
+    else:
+        item.save()
     logger.info('Adding music from youtube(id={}) to playlist'.format(vid))
     return render(request, 'add_success.html')
 
@@ -213,7 +231,20 @@ def add_file_item(request):
         # Add to playlist
         item = PlaylistItem(type='file', title=music.title, artist=music.artist,
                             album=music.album, link=music.filename)
-        item.save()
+        if not PlaylistItem.objects.filter(playing=True).exists():
+            item.playing = True
+            item.save()
+            # Signal /nowplaying playlist has been updated
+            ConsumerUtil.set_np_idx(item.pk)
+            channel = get_channel_layer()
+            async_to_sync(channel.group_send)('music', {
+                'type': 'music.event',
+                'text': json.dumps({
+                    'target': 'skip',  # will make client refresh
+                }),
+            })
+        else:
+            item.save()
         logger.info('Adding music from cache(file={}) '
                     'to playlist'.format(music.filename))
 
@@ -226,7 +257,8 @@ def add_file_item(request):
             message = 'File with same name already exists in the cache :('
             return render(request, 'upload_error.html', {'message': message})
         # Write to music_cache first
-        with open('music_cache/{}'.format(file.name), 'wb') as fd:
+        with open('jukebox/static/music_cache/{}'.format(file.name),
+                  'wb') as fd:
             if file.multiple_chunks():  # big files
                 for chunk in file.chunks():
                     fd.write(chunk)
@@ -234,22 +266,24 @@ def add_file_item(request):
                 fd.write(file.read())
         # Check if file is valid
         try:
-            music_fd = mutagen.File('music_cache/{}'.format(file.name))
+            music_fd = mutagen.File('jukebox/static/music_cache/{}'
+                                    .format(file.name))
         except mutagen.MutagenError:  # Corrupted file
             logger.error('UPLOAD: Corrupted file (file={})'.format(file.name))
-            os.remove('music_cache/{}'.format(file.name))
+            os.remove('jukebox/static/music_cache/{}'.format(file.name))
             message = 'Looks like your file is corrupted :('
             return render(request, 'upload_error.html', {'message': message})
         if music_fd is None:  # Invalid file type
             logger.error('UPLOAD: Unsupported file (file={})'.format(file.name))
-            os.remove('music_cache/{}'.format(file.name))
+            os.remove('jukebox/static/music_cache/{}'.format(file.name))
             message = 'Looks like jukebox does not support this file :('
             return render(request, 'upload_error.html', {'message': message})
         # Get tag info and update cache map database
         len_div = divmod(music_fd.info.length, 60)  # length given in seconds
         length = '{}m {}s'.format(int(len_div[0]), int(len_div[1]))
         try:
-            tag = stagger.read_tag('music_cache/{}'.format(file.name))
+            tag = stagger.read_tag('jukebox/static/music_cache/{}'
+                                   .format(file.name))
             title = tag.title
             if title == '':
                 title = file
@@ -267,7 +301,20 @@ def add_file_item(request):
         # Add file to playlist
         plist_item = PlaylistItem(type='file', title=title, artist=artist,
                                   album=album, link=file.name)
-        plist_item.save()
+        if not PlaylistItem.objects.filter(playing=True).exists():
+            plist_item.playing = True
+            plist_item.save()
+            # Signal /nowplaying
+            ConsumerUtil.set_np_idx(plist_item.pk)
+            channel = get_channel_layer()
+            async_to_sync(channel.group_send)('music', {
+                'type': 'music.event',
+                'text': json.dumps({
+                    'target': 'skip',  # will make client refresh
+                }),
+            })
+        else:
+            plist_item.save()
         logger.info('Adding music from upload(file={}) '
                     'to playlist'.format(file.name))
 

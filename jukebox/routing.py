@@ -4,4 +4,5 @@ from . import consumers
 
 websocket_urlpatterns = [
     path('ws/skipadd/', consumers.SkipAddConsumer),
+    path('ws/music', consumers.MusicConsumer),
 ]

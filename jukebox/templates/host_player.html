@@ -7,22 +7,22 @@
 </head>
 <body>
     <div id="music_info">
-        <div id="album_cover">
+        <div id="cover">
 
         </div>
-        <h1>Title</h1>
-        <h2>Artist</h2>
-        <h2>Album</h2>
+        <h1 id="title">Title</h1>
+        <h2 id="artist">Artist</h2>
+        <h2 id="album">Album</h2>
     </div>
     <div id="skip_area">
         <span id="skip_label" ><b>Votes for Skip</b></span>
         <span id="skip_count">0</span>
-        <span>/ 5</span>
+        <span>/ {{ skip_threshold }}</span>
     </div>
     <div id="readd_area">
         <span id="readd_label"><b>Votes for Re-add</b></span>
         <span id="readd_count">0</span>
-        <span>/ 5</span>
+        <span>/ {{ readd_threshold }}</span>
     </div>
     <br>
     <h1>Playlist</h1>
@@ -33,19 +33,19 @@
     <h3><a href="http://{{ address }}:8000">http://{{ address }}:8000</a></h3><br>
 </body>
 <script>
-    let socket = new WebSocket(
+    let sa_socket = new WebSocket(
         'ws://' + window.location.host + '/ws/skipadd/'
     );
-    socket.onopen = function(f) {
+    sa_socket.onopen = function(f) {
         console.info('Opened skip-add socket');
-        socket.send(JSON.stringify({
+        sa_socket.send(JSON.stringify({
             'fetch': 'request',
         }));
     };
-    socket.onclose = function(f) {
+    sa_socket.onclose = function(f) {
         console.error('Skip-add socket closed');
     };
-    socket.onmessage = function(f) {
+    sa_socket.onmessage = function(f) {
         let msg = JSON.parse(f.data);
         let target = msg['target'];
         if(target === 'skip') {

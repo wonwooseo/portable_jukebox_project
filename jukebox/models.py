@@ -10,6 +10,7 @@ class PlaylistItem(models.Model):
     artist = models.CharField(max_length=80)  # for file only
     type = models.CharField(max_length=10)  # youtube or file
     link = models.TextField()  # videoID or filename
+    playing = models.BooleanField(default=False)  # Mark if item is now playing
 
 
 class MusicCacheItem(models.Model):
