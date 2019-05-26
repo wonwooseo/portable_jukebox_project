@@ -71,10 +71,14 @@ class JukeboxConfig(AppConfig):
                 if len(title) > 80:
                     title = title[:77] + '...'
                 artist = tag.artist
+                if artist == '':
+                    artist = '<>'
                 album = tag.album
+                if album == '':
+                    album = '<>'
             except stagger.NoTagError:
                 title = file
-                artist, album = '', ''
+                artist, album = '<>', '<>'
             item = MusicCacheItem(title=title, artist=artist, album=album,
                                   length=length, filename=file)
             bulk_obj_list.append(item)

@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <title>Now Playing</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="{% static 'js/np_skipadd.js'%}"></script>
+    <script src="{% static 'js/np_music.js' %}"></script>
 </head>
 <body>
-    <h1>Title</h1>
-    <h2>Artist</h2>
-    <h2>Album</h2>
+    <h1 id="title">Title</h1>
+    <h2 id="artist">Artist</h2>
+    <h2 id="album">Album</h2>
     <div id="skip_area">
         <button id="btn_skip" class="toggle">Vote to Skip</button>
         <span id="skip_count">0</span>
@@ -21,69 +25,4 @@
     <a href="/qrcode">How to access jukebox?</a><br>
     <a href="/add">Add Music to Playlist</a>
 </body>
-<script>
-    /*
-     * TODO: Better extract script to separate file
-     * TODO: Use switch-case for 'target'
-     */
-    let socket = new WebSocket(
-        'ws://' + window.location.host + '/ws/skipadd/'
-    );
-    socket.onopen = function(f) {
-        console.info('Opened skip-add socket');
-        socket.send(JSON.stringify({
-            'fetch': 'request',
-        }));
-    };
-    socket.onclose = function(f) {
-        console.error('Skip-add socket closed');
-    };
-    socket.onmessage = function(f) {
-        let msg = JSON.parse(f.data);
-        let target = msg['target'];
-        if(target === 'skip') {
-            let count_elem = document.getElementById('skip_count');
-            // let count = Number(count_elem.innerText);
-            count_elem.innerText = msg['count'];
-        }
-        else if(target === 'readd') {
-            let count_elem = document.getElementById('readd_count');
-            // let count = Number(count_elem.innerText);
-            count_elem.innerText = msg['count'];
-        }
-        else if(target === 'fetch') {
-            let scount_elem = document.getElementById('skip_count');
-            let rcount_elem = document.getElementById('readd_count');
-            scount_elem.innerText = msg['skip'];
-            rcount_elem.innerText = msg['readd'];
-        }
-        else if(target === 'notplaying') {
-            let skipbtn_elem = document.getElementById('btn_skip');
-            skipbtn_elem.disabled = true;
-            let readdbtn_elem = document.getElementById('btn_readd');
-            readdbtn_elem.disabled = true;
-        }
-        else console.error('Invalid target embedded in message');
-    };
-
-    let skipbtn_elem = document.getElementById('btn_skip');
-    skipbtn_elem.onclick = function(f) {
-        socket.send(JSON.stringify({
-            'target': 'skip',
-            'action': 'plus'
-        }));
-        skipbtn_elem.innerText = 'Voted for Skip';
-        skipbtn_elem.disabled = true;
-    };
-
-    let readdbtn_elem = document.getElementById('btn_readd');
-    readdbtn_elem.onclick = function(f) {
-        socket.send(JSON.stringify({
-            'target': 'readd',
-            'action': 'plus'
-        }));
-        readdbtn_elem.innerText = 'Voted for Re-add';
-        readdbtn_elem.disabled = true;
-    };
-</script>
 </html>

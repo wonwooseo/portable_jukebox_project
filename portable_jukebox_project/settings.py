@@ -195,8 +195,8 @@ MAX_FILESIZE = 20
 
 # Minimum votes required to skip current music.
 # Jukebox will assume invalid value as 1(Default).
-MIN_SKIP_VOTE = 1
+MIN_SKIP_VOTE = 3
 
 # Minimum votes required to re-add current music to playlist.
 # Jukebox will assume invalid value as 1(Default).
-MIN_READD_VOTE = 1
+MIN_READD_VOTE = 3

@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>Now Playing (Host)</title>
     {% load static %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="{% static 'js/np_host_skipadd.js'%}"></script>
+    <script src="{% static 'js/np_host_music.js' %}"></script>
 </head>
 <body>
     <div id="music_info">
@@ -24,7 +27,9 @@
         <span id="readd_count">0</span>
         <span>/ {{ readd_threshold }}</span>
     </div>
-    <br>
+    <div id="player_area">
+
+    </div>
     <h1>Playlist</h1>
     <h1>How to access jukebox?</h1>
     <h2>Scan following QR code:</h2>
@@ -32,39 +37,4 @@
     <h2>Or, use following URL</h2>
     <h3><a href="http://{{ address }}:8000">http://{{ address }}:8000</a></h3><br>
 </body>
-<script>
-    let sa_socket = new WebSocket(
-        'ws://' + window.location.host + '/ws/skipadd/'
-    );
-    sa_socket.onopen = function(f) {
-        console.info('Opened skip-add socket');
-        sa_socket.send(JSON.stringify({
-            'fetch': 'request',
-        }));
-    };
-    sa_socket.onclose = function(f) {
-        console.error('Skip-add socket closed');
-    };
-    sa_socket.onmessage = function(f) {
-        let msg = JSON.parse(f.data);
-        let target = msg['target'];
-        if(target === 'skip') {
-            let count_elem = document.getElementById('skip_count');
-            // let count = Number(count_elem.innerText);
-            count_elem.innerText = msg['count'];
-        }
-        else if(target === 'readd') {
-            let count_elem = document.getElementById('readd_count');
-            // let count = Number(count_elem.innerText);
-            count_elem.innerText = msg['count'];
-        }
-        else if(target === 'fetch') {
-            let scount_elem = document.getElementById('skip_count');
-            let rcount_elem = document.getElementById('readd_count');
-            scount_elem.innerText = msg['skip'];
-            rcount_elem.innerText = msg['readd'];
-        }
-        else console.error('Invalid target embedded in message');
-    };
-</script>
 </html>

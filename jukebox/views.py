@@ -290,10 +290,14 @@ def add_file_item(request):
             if len(title) > 80:
                 title = title[:77] + '...'
             artist = tag.artist
+            if artist == '':
+                artist = '<>'
             album = tag.album
+            if album == '':
+                album = '<>'
         except stagger.NoTagError:
             title = file.name
-            artist, album = '', ''
+            artist, album = '<>', '<>'
         cache_item = MusicCacheItem(title=title, artist=artist, album=album,
                                     length=length, filename=file.name)
         cache_item.save()
