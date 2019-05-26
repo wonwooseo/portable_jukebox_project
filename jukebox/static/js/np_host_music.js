@@ -1,9 +1,13 @@
 /**
  *  Script to handle events from music websocket
  */
-$(document).ready(function() {
-    let m_socket = new WebSocket('ws://' + window.location.host + '/ws/music/');
 
+// Global scope variables (for use in iframe api event functions)
+var path;
+var m_socket;
+
+$(document).ready(function() {
+    m_socket = new WebSocket('ws://' + window.location.host + '/ws/music/');
     m_socket.onopen = function(f) {
         console.info('Opened music socket');
         m_socket.send(JSON.stringify({
@@ -24,24 +28,29 @@ $(document).ready(function() {
                 document.getElementById('artist').innerText = msg['artist'];
                 document.getElementById('album').innerText = msg['album'];
                 let player_type = msg['type'];
-                let path = msg['link'];
-                console.info(path);
+                path = msg['link'];
                 if(player_type === 'file') {
+                    // clear placeholding div
+                    let div = document.getElementById('player_dom');
+                    div.parentElement.removeChild(div);
+                    // create html5 audio player
                     let html5player = document.createElement('audio');
                     html5player.setAttribute('src', path);
                     html5player.setAttribute('controls', '');
                     html5player.setAttribute('autoplay', '');
+                    html5player.volume = 0.25;
+                    html5player.onended = function() {
+                      m_socket.send(JSON.stringify({
+                          'target': 'skip',
+                      }));
+                    };
                     document.getElementById('player_area').appendChild(html5player);
                 }
                 else {
-                    let iframe = document.createElement('iframe');
-                    iframe.setAttribute('type', 'text/html');
-                    iframe.setAttribute('width', '640');
-                    iframe.setAttribute('height', '480');
-                    iframe.setAttribute('src', path);
-                    iframe.setAttribute('frameborder', '0');
-                    iframe.setAttribute('allow', 'autoplay');
-                    document.getElementById('player_area').appendChild(iframe);
+                    // load Youtube Iframe API script
+                    let tag = document.createElement('script');
+                    tag.src = 'https://youtube.com/iframe_api';
+                    document.getElementById('player_area').appendChild(tag);
                 }
                 break;
             case 'skip':
@@ -59,3 +68,32 @@ $(document).ready(function() {
         }
     };
 });
+
+var player;
+function onYouTubeIframeAPIReady() {
+    // replace div with iframe when api is ready
+    console.info('IframeAPI ready');
+    player = new YT.Player('player_dom', {
+        height: '480',
+        width: '640',
+        videoId: path,
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    // Start playing when ready
+    event.target.playVideo();
+}
+
+function onPlayerStateChange(event) {
+    // Send skip signal when video ends
+    if (event.data == YT.PlayerState.ENDED) {
+        m_socket.send(JSON.stringify({
+            'target': 'skip',
+        }));
+    }
+}

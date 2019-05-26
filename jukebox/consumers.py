@@ -119,9 +119,7 @@ class MusicConsumer(WebsocketConsumer):
             if np_item.type == 'file':
                 path = '/static/music_cache/{}'.format(np_item.link)
             else:
-                path = 'https://www.youtube.com/embed/{}?autoplay=1&' \
-                       'enablejsapi=1&fs=0&origin=http://127.0.0.1:8000'\
-                    .format(np_item.link)
+                path = np_item.link
             async_to_sync(self.channel_layer.send)(
                 self.channel_name,
                 {

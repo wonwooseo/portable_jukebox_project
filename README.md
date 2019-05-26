@@ -7,9 +7,16 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 - Skip, re-add vote
     - Settings for minimum votes
 
+## Dev environment
+- Python 3.7.1
+- Django v2.2.1
+- Django Channels v2.1.7
+- redis (running on docker container)
+
 ## Blueprint (views)
 - [x] /index
 - [x] /nowplaying
+- [x] /host_player
 - [x] /qrcode
 - [x] /add
 - [x] /add_youtube
@@ -28,19 +35,17 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 - [x] Client clicks add button
     - [x] Client clicks add from youtube
         - [x] Client searches keyword
-        - [ ] Client picks from results
+        - [x] Client picks from results
     - [x] Client clicks add from file
-        - [ ] Client picks from cache
-        - [ ] Client uploads own file
-- [ ] Client clicks skip button
+        - [x] Client picks from cache
+        - [x] Client uploads own file
+- [x] Client clicks skip button
 - [ ] Client clicks re-add button
-- [ ] Skip condition is met
+- [x] Skip condition is met
 - [ ] Re-add condition is met
 
 ## Notes for personal use
 - how to check youtube video duration
-- embedding youtube player
-- how to signal end of song / skip
 - channels use docker/redis for broadcast backend..
     - find other lightweight options (for production)
     - or manually keep channel names in consumers.py
