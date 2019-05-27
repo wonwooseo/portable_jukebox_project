@@ -36,7 +36,8 @@ def index(request):
         logger.info('Session login from {}'.
                     format(request.META.get('REMOTE_ADDR')))
         return redirect('now_playing')
-    if not settings.USE_PASSWORD:
+    if not settings.USE_PASSWORD or settings.PASSWORD == '':
+        request.session['validated'] = True
         logger.info('Session login from {}'.
                     format(request.META.get('REMOTE_ADDR')))
         return render(request, 'nowplaying.html')
@@ -51,12 +52,6 @@ def check_password(request):
     :param request: request object from client
     :return: calls now_playing if match, index if mismatch
     """
-    if settings.PASSWORD == '':
-        request.session['validated'] = True
-        logger.info('Session login from {}'.
-                    format(request.META.get('REMOTE_ADDR')))
-        return redirect('now_playing')
-
     password = request.POST['password']
     if password == settings.PASSWORD:
         request.session['validated'] = True
@@ -116,6 +111,10 @@ def add_youtube(request):
     if not check_validated_access(request, 'add_youtube'):
         request.session.flush()
         return redirect('index')
+    if settings.API_KEY == '':
+        logger.warning('YouTube API Key is not provided')
+        message = 'API key is not provided.'
+        return render(request, 'add_error.html', {'message': message})
     return render(request, 'add_youtube.html')
 
 
@@ -133,14 +132,17 @@ def search_youtube(request):
 
     # Calling YouTube Data API
     resultlist = []
-    # TODO: Should read api key from untracked file when repo goes public
-    api_key = 'AIzaSyB6J3gOdKJ4ZUefoABbHitfzWFzvcLUm3s'
+    api_key = settings.API_KEY
     api_url = 'https://www.googleapis.com/youtube/v3/' \
               'search?part=snippet&type=video&videoEmbeddable=true&'
     max_results = 10
     keyword = request.POST['keyword']  # Never null; validated at form
     api_url += 'maxResults={}&q={}&key={}'.format(max_results, keyword, api_key)
     response = requests.get(api_url)  # API call
+    if response.status_code == 400:
+        logger.error('Failed to call YouTube API with provided API key')
+        message = 'YouTube API call failed using provided key.'
+        return render(request, 'add_error.html', {'message': message})
     logger.info('YouTube API Call (Status={})'.format(response.status_code))
     res_json = response.json()
     for item in res_json['items']:

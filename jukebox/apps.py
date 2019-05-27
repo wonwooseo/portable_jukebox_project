@@ -10,9 +10,48 @@ class JukeboxConfig(AppConfig):
     name = 'jukebox'
 
     def ready(self):
+        self.read_config()
         self.create_qrqode()
         self.reset_db()
         self.cache_init()
+
+    @staticmethod
+    def read_config():
+        """
+        Reads config file and sets variables in settings.py accordingly.
+        Creates new config from template if .config doesn't exist.
+        :return: None
+        """
+        from configparser import ConfigParser
+        import os
+        from shutil import copyfile
+        if not os.path.isfile('.config'):
+            copyfile('.config_default', '.config')
+            logger.info('Created config file using defaults')
+            return
+        p = ConfigParser()
+        p.read('.config')
+        # if config has missing section/options, default will be used
+        settings.HOST_IP = p.get('SERVER', 'HOST_IP',
+                                 fallback=settings.HOST_IP)
+        settings.HOST_PASSWORD = p.get('SERVER', 'HOST_PASSWORD',
+                                       fallback=settings.HOST_PASSWORD)
+        settings.USE_PASSWORD = p.get('SERVER', 'USE_PASSWORD',
+                                      fallback=settings.USE_PASSWORD)
+        settings.PASSWORD = p.get('SERVER', 'PASSWORD',
+                                  fallback=settings.PASSWORD)
+        settings.ONLY_LOCAL = p.get('SERVER', 'ONLY_LOCAL',
+                                    fallback=settings.ONLY_LOCAL)
+        settings.API_KEY = p.get('SERVER', 'API_KEY',
+                                 fallback=settings.API_KEY)
+        settings.MAX_LENGTH = p.getint('SERVER', 'MAX_LENGTH',
+                                       fallback=settings.MAX_LENGTH)
+        settings.MAX_FILESIZE = p.getint('SERVER', 'MAX_FILESIZE',
+                                         fallback=settings.MAX_FILESIZE)
+        settings.MIN_SKIP_VOTE = p.getint('SERVER', 'MIN_SKIP_VOTE',
+                                          fallback=settings.MIN_SKIP_VOTE)
+        settings.MIN_READD_VOTE = p.getint('SERVER', 'MIN_READD_VOTE',
+                                           fallback=settings.MIN_READD_VOTE)
 
     @staticmethod
     def create_qrqode():

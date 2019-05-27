@@ -166,37 +166,23 @@ LOGGER_CONFIG = {
     }
 }
 
-# Jukebox Settings
-# Enter host machine's IP address here.
-HOST_IP = '192.168.0.103'
+# Variables to be updated by reading config.
+HOST_IP = '127.0.0.1'
 
-# Key that host(admin) will use to access host-specific features.
 HOST_PASSWORD = 'admin'
 
-# Determines whether clients need password to access jukebox.
 USE_PASSWORD = True
 
-# Key that clients will use to access jukebox.
-# If USE_PASSWORD is set to False, this is ignored.
-# If PASSWORD is left empty, jukebox will not ask for passwords.
 PASSWORD = '1234'
 
-# Limit access to jukebox only to clients on same network.
-# If set to False, jukebox will accept any clients.
 ONLY_LOCAL = True
 
-# Maximum length of music to be added from YouTube, in minutes.
-# Jukebox will assume invalid value as 60(Default).
+API_KEY = ''
+
 MAX_LENGTH = 60
 
-# Maximum size of music file to be uploaded from client, in MB.
-# Jukebox will assume invalid value as 20(Default).
 MAX_FILESIZE = 20
 
-# Minimum votes required to skip current music.
-# Jukebox will assume invalid value as 1(Default).
 MIN_SKIP_VOTE = 1
 
-# Minimum votes required to re-add current music to playlist.
-# Jukebox will assume invalid value as 1(Default).
 MIN_READD_VOTE = 1

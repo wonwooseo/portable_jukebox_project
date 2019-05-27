@@ -2,5 +2,6 @@
 env
 *.sqlite3
 *.mrproper
+.config
 __pycache__
 jukebox/static/img/qr.png
