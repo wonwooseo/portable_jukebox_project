@@ -54,7 +54,7 @@ class SkipAddConsumer(WebsocketConsumer):
                     }),
                 }
             )
-        else:  # Pass message to handler
+        else:
             if data_json.get('target') == 'skip':
                 skip_counter += 1
                 if skip_counter == settings.MIN_SKIP_VOTE:
@@ -62,12 +62,21 @@ class SkipAddConsumer(WebsocketConsumer):
                     # when client votes skip for item a,
                     # consumer might already be in item b,
                     # thus counting vote for a as vote for b.
-                    skip_counter, readd_counter = 0, 0
                     ConsumerUtil.skip_handler()
                     return
                 counter = skip_counter
             elif data_json.get('target') == 'readd':
                 readd_counter += 1
+                if readd_counter == settings.MIN_SKIP_VOTE:
+                    # TODO: current item sync between consumer and client?
+                    # Same issue with skip
+
+                    # Copy and insert current item to playlist
+                    np_item = PlaylistItem.objects.get(pk=np_idx)
+                    np_item.playing = False
+                    np_item.pk = None
+                    np_item.save()
+                    readd_counter = '✔'
                 counter = readd_counter
             else:
                 # Something wrong happened
@@ -154,6 +163,8 @@ class ConsumerUtil:
         playing, next item as playing, then updates np_idx.
         :return: None
         """
+        global skip_counter, readd_counter
+        skip_counter, readd_counter = 0, 0
         channel_layer = get_channel_layer()
         # TODO: More efficient way of making queries?
         np_item = PlaylistItem.objects.get(pk=np_idx)

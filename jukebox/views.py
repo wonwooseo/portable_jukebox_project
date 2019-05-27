@@ -273,10 +273,17 @@ def add_file_item(request):
             os.remove('jukebox/static/music_cache/{}'.format(file.name))
             message = 'Looks like your file is corrupted :('
             return render(request, 'upload_error.html', {'message': message})
-        if music_fd is None:  # Invalid file type
+        # Invalid file type
+        if music_fd is None or 'mp3' not in music_fd.mime[0]:
             logger.error('UPLOAD: Unsupported file (file={})'.format(file.name))
             os.remove('jukebox/static/music_cache/{}'.format(file.name))
             message = 'Looks like jukebox does not support this file :('
+            return render(request, 'upload_error.html', {'message': message})
+        # file might not be valid mpeg audio
+        if music_fd.info.sketchy:
+            logger.error('UPLOAD: Corrupted file (file={})'.format(file.name))
+            os.remove('jukebox/static/music_cache/{}'.format(file.name))
+            message = 'Looks like your file is corrupted :('
             return render(request, 'upload_error.html', {'message': message})
         # Get tag info and update cache map database
         len_div = divmod(music_fd.info.length, 60)  # length given in seconds

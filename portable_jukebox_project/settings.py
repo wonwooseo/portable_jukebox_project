@@ -25,7 +25,7 @@ SECRET_KEY = 'g0(z*3k#vhv!js)#f!_*obxn3z0gx#r(=yhbr6kh^^u2$5j#9%'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost']
 
 ALLOWED_CIDR_NETS = ['192.168.0.1/8']
 
@@ -195,8 +195,8 @@ MAX_FILESIZE = 20
 
 # Minimum votes required to skip current music.
 # Jukebox will assume invalid value as 1(Default).
-MIN_SKIP_VOTE = 3
+MIN_SKIP_VOTE = 1
 
 # Minimum votes required to re-add current music to playlist.
 # Jukebox will assume invalid value as 1(Default).
-MIN_READD_VOTE = 3
+MIN_READD_VOTE = 1

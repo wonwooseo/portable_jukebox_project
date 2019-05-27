@@ -30,6 +30,7 @@ $(document).ready(function() {
                 let rcount_elem = document.getElementById('readd_count');
                 scount_elem.innerText = msg['skip'];
                 rcount_elem.innerText = msg['readd'];
+                if(msg['readd'] === '✔') document.getElementById('btn_readd').disabled = true;
                 break;
             case 'notplaying':
                 let skipbtn_elem = document.getElementById('btn_skip');

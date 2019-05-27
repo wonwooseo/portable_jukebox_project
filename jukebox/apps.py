@@ -10,15 +10,28 @@ class JukeboxConfig(AppConfig):
     name = 'jukebox'
 
     def ready(self):
+        self.create_qrqode()
+        self.reset_db()
+        self.cache_init()
+
+    @staticmethod
+    def create_qrqode():
+        """
+        Creates QR code png on startup based on address specified in settings.py
+        :return: None
+        """
         import pyqrcode
-        # Creates QR code png on startup,
-        # based on address specified in settings.py
         url = 'http://' + settings.HOST_IP + ':8000'
         qr_object = pyqrcode.create(url)
         qr_object.png('jukebox/static/img/qr.png', scale=12)
         logger.info("Created QR Code image")
 
-        # database reset (if not using in-memory db)
+    @staticmethod
+    def reset_db():
+        """
+        Resets database tables with raw queries
+        :return: None
+        """
         from django.db import connection
         with connection.cursor() as c:
             # clear playlist table
@@ -34,7 +47,12 @@ class JukeboxConfig(AppConfig):
             c.execute(sql)
             logger.info("Playlist db reset finished")
 
-        # Map files in music_cache to database
+    @staticmethod
+    def cache_init():
+        """
+        Map files in music_cache to database
+        :return: None
+        """
         import os
         import mutagen
         import stagger.id3
@@ -54,9 +72,24 @@ class JukeboxConfig(AppConfig):
             try:
                 music_fd = mutagen.File('jukebox/static/music_cache/{}'
                                         .format(file))
-                if music_fd is None:  # Invalid file type
-                    continue
             except mutagen.MutagenError:
+                logger.error('Corrupted file in cache({})'.format(file))
+                os.remove('jukebox/static/music_cache/{}'.format(file))
+                continue
+            if music_fd is None:  # Invalid file type
+                # TODO: remove gitignore check on production!
+                if file == '.gitignore':
+                    continue
+                logger.error('Unsupported file in cache({})'.format(file))
+                os.remove('jukebox/static/music_cache/{}'.format(file))
+                continue
+            if 'mp3' not in music_fd.mime[0]:  # not mp3 file
+                logger.error('Unsupported file in cache({})'.format(file))
+                os.remove('jukebox/static/music_cache/{}'.format(file))
+                continue
+            if music_fd.info.sketchy:  # file might not be valid mpeg audio
+                logger.error('Corrupted file in cache({})'.format(file))
+                os.remove('jukebox/static/music_cache/{}'.format(file))
                 continue
             # length info is given in seconds
             len_div = divmod(music_fd.info.length, 60)
@@ -83,3 +116,4 @@ class JukeboxConfig(AppConfig):
                                   length=length, filename=file)
             bulk_obj_list.append(item)
         MusicCacheItem.objects.bulk_create(bulk_obj_list)
+        logger.info('Cache initialization finished')

@@ -76,6 +76,7 @@ function onYouTubeIframeAPIReady() {
     player = new YT.Player('player_dom', {
         height: '480',
         width: '640',
+        origin: window.location.host,
         videoId: path,
         events: {
             'onReady': onPlayerReady,
