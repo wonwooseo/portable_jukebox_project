@@ -4,4 +4,3 @@ env
 *.mrproper
 .config
 __pycache__
-jukebox/static/img/qr.png

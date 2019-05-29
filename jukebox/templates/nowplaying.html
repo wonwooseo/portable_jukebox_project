@@ -16,9 +16,16 @@
             <h4>Now Playing</h4>
         </div>
         <div class="card-body">
-            <h1 id="title" class="card-title">Title</h1>
-            <h3 id="artist" class="card-subtitle text-muted">Artist</h3>
-            <h3 id="album" class="card-text text-muted">Album</h3>
+            <div class="row">
+                <div class="col-md-2 self-align-center">
+                  <img id="cover" src="{% static 'img/default.png' %}" class="card-img">
+                </div>
+                <div class="col-md-10">
+                    <h1 id="title" class="card-title">Title</h1>
+                    <h3 id="artist" class="card-subtitle text-muted">Artist</h3>
+                    <h3 id="album" class="card-text text-muted">Album</h3>
+                </div>
+            </div>
             <hr class="my-4">
             <button id="btn_skip" class="btn btn-primary">
                 Vote to Skip <span id="skip_count" class="badge badge-light">0</span>

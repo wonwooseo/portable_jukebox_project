@@ -6,6 +6,8 @@ from jukebox.models import *
 from jukebox.consumers import ConsumerUtil
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from PIL import Image
+import io
 import logging.config
 import os
 import mutagen
@@ -304,6 +306,19 @@ def add_file_item(request):
             album = tag.album
             if album == '':
                 album = '<>'
+            # extract album cover img
+            cover_bytes = None
+            ptag = tag.get(stagger.id3.PIC)
+            if ptag:
+                cover_bytes = ptag[0].data
+            aptag = tag.get(stagger.id3.APIC)
+            if aptag:
+                cover_bytes = aptag[0].data
+            if cover_bytes:
+                img = Image.open(io.BytesIO(cover_bytes))
+                img.save('/jukebox/static/img/cover_cache/{}.png'
+                         .format(title), 'PNG')
+                img.close()
         except stagger.NoTagError:
             title = file.name
             artist, album = '<>', '<>'

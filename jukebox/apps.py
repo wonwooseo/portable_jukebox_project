@@ -93,10 +93,13 @@ class JukeboxConfig(AppConfig):
         :return: None
         """
         import os
+        import io
         import mutagen
         import stagger.id3
+        from PIL import Image
         from jukebox.models import MusicCacheItem
         # Get list of music files in cache
+        filelist, coverlist = [], []
         try:
             filelist = os.listdir('jukebox/static/music_cache')
         except FileNotFoundError:
@@ -104,6 +107,12 @@ class JukeboxConfig(AppConfig):
             os.mkdir('jukebox/static/music_cache')
             logger.info("Created music_cache in jukebox/static")
             return
+        try:
+            coverlist = os.listdir('jukebox/static/img/cover_cache')
+        except FileNotFoundError:
+            logger.error("Failed to find img/cover_cache directory")
+            os.mkdir('jukebox/static/img/cover_cache')
+            logger.info("Created img/cover_cache in jukebox/static")
         # save title, artist, album, length, filename to db
         bulk_obj_list = []
         for file in filelist:
@@ -148,6 +157,20 @@ class JukeboxConfig(AppConfig):
                 album = tag.album
                 if album == '':
                     album = '<>'
+                # extract album cover img
+                if '{}.png'.format(title) not in coverlist:
+                    cover_bytes = None
+                    ptag = tag.get(stagger.id3.PIC)
+                    if ptag:
+                        cover_bytes = ptag[0].data
+                    aptag = tag.get(stagger.id3.APIC)
+                    if aptag:
+                        cover_bytes = aptag[0].data
+                    if cover_bytes:  # cover image exists in tag
+                        img = Image.open(io.BytesIO(cover_bytes))
+                        img.save('jukebox/static/img/cover_cache/{}.png'
+                                 .format(title), 'PNG')
+                        img.close()
             except stagger.NoTagError:
                 title = file
                 artist, album = '<>', '<>'

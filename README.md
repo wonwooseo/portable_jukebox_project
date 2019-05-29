@@ -7,7 +7,7 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 - Skip, re-add vote
     - Settings for minimum votes
 
-## Dev environment
+## Core dev env
 - Python 3.7.1
 - Django v2.2.1
 - Django Channels v2.1.7
@@ -40,27 +40,14 @@ Project to build a locally-hosted, portable jukebox application based on Django.
         - [x] Client picks from cache
         - [x] Client uploads own file
 - [x] Client clicks skip button
-- [ ] Client clicks re-add button
+- [x] Client clicks re-add button
 - [x] Skip condition is met
-- [ ] Re-add condition is met
+- [x] Re-add condition is met
 
 ## Notes for personal use
 - how to check youtube video duration
 - channels use docker/redis for broadcast backend..
     - find other lightweight options (for production)
     - or manually keep channel names in consumers.py
-- Album cover retrieving code
-    ```python
-    import stagger.id3
-    tag = stagger.read_tag('music_cache/a.mp3')  # get tags of music file
-    cover = None
-    with tag.get(stagger.id3.PIC) as ptag:
-        if ptag:
-            cover = ptag[0].data
-    with tag.get(stagger.id3.APIC) as aptag:
-        if aptag:
-            cover = aptag[0].data
-    # if cover left None, no album cover in tag
-    ```
 - Configure host IP automatically
 - Prevent duplicate votes

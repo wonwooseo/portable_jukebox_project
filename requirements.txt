@@ -1,6 +1,7 @@
 django>=2.2.1
 pyqrcode>=1.2
 pypng
+pillow>=6.0.0
 django-allow-cidr
 requests
 mutagen
