@@ -17,20 +17,28 @@
             <ul class="list-group list-group-flush">
                 {% for item in resultlist %}
                     <li class="list-group-item">
-                        <div>
-                            <form id="enlist_{{ item.0 }}" method="post" action="/add_file_item">
-                                {% csrf_token %}
+
+                        <form id="enlist_{{ item.0 }}" method="post" action="/add_file_item">
+                            {% csrf_token %}
+                            <div class="row">
                                 {% if item.2 == '' %}
-                                    <b>{{ item.1 }}</b> ({{ item.3 }})
+                                    <div class="col-md-10">
+                                        <b>{{ item.1 }}</b> ({{ item.3 }})
+                                    </div>
                                 {% else %}
-                                    <b>{{ item.1 }} - {{ item.2 }}</b> ({{ item.3 }})
+                                    <div class="col-md-10">
+                                        <b>{{ item.1 }} - {{ item.2 }}</b> ({{ item.3 }})
+                                    </div>
                                 {% endif %}
-                                <button type="submit" form="enlist_{{ item.0 }}" name="fileid" value="{{ item.0 }}" class="btn btn-primary float-right">
-                                    Add this file
-                                </button>
-                                <input type="hidden" name="reqtype" value="add">
-                            </form>
-                        </div>
+                                <div class="col-md-2" style="text-align: center">
+                                    <button type="submit" form="enlist_{{ item.0 }}" name="fileid" value="{{ item.0 }}" class="btn btn-primary">
+                                        Add this file
+                                    </button>
+                                </div>
+                            </div>
+                            <input type="hidden" name="reqtype" value="add">
+                        </form>
+
                     </li>
                 {% endfor %}
             </ul>
@@ -42,7 +50,7 @@
             <h4>Upload to cache</h4>
         </div>
         <div class="card-body">
-            <p class="card-text lead">
+            <p class="card-text">
                 <span class="badge badge-danger">
                     <i class="fas fa-exclamation-triangle"></i>
                     Jukebox currently only accepts mp3 files.

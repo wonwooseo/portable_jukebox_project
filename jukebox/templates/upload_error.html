@@ -15,12 +15,12 @@
         </div>
         <hr class="my-4">
         <h4>Try uploading different file here:</h4>
-        <h5>
+        <p>
             <span class="badge badge-danger">
                 <i class="fas fa-exclamation-triangle"></i>
                 Jukebox currently only accepts mp3 files.
             </span>
-        </h5>
+        </p>
         <form id="upload_file" method="post" action="/add_file_item" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="file" name="musicfile" accept="audio/mp3" class="form-control-file" required>

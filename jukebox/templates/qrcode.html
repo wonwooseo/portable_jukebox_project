@@ -12,10 +12,10 @@
         <h1>How to access Jukebox?</h1>
         <hr class="my-4">
         <h3>Scan following QR code:</h3>
-        <img src="{% static 'img/qr.png' %}" alt="QR Code">
+        <img src="{% static 'img/qr.png' %}" alt="QR Code" style="max-width:100%">
         <hr class="my-4">
         <h3>Or, use following URL</h3>
-        <h3><a href="http://{{ address }}:8000">http://{{ address }}:8000</a></h3><br>
+        <h5><a href="http://{{ address }}:8000">http://{{ address }}:8000</a></h5><br>
     </div>
     <div style="text-align: center; margin:2em auto">
         <a href="/nowplaying" class="btn btn-secondary">Back</a>

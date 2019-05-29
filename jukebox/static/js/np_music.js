@@ -20,10 +20,16 @@ $(document).ready(function() {
         let target = msg['target'];
         switch(target) {
             case 'fetch':
-                document.getElementById('cover').src = '/static/img/cover_cache/' + msg['title'] + '.png';
-                document.getElementById('cover').onerror = function() {
-                    this.src = '/static/img/default.png';
-                };
+                let player_type = msg['type'];
+                if(player_type === 'file') {
+                    document.getElementById('cover').src = '/static/img/cover_cache/' + msg['title'] + '.png';
+                    document.getElementById('cover').onerror = function () {
+                        this.src = '/static/img/default.png';
+                    };
+                }
+                else {
+                    document.getElementById('cover').src = '/static/img/default_net.png';
+                }
                 document.getElementById('title').innerText = msg['title'];
                 document.getElementById('artist').innerText = msg['artist'];
                 document.getElementById('album').innerText = msg['album'];
