@@ -44,13 +44,13 @@ class JukeboxConfig(AppConfig):
                                     fallback=settings.ONLY_LOCAL)
         settings.API_KEY = p.get('SERVER', 'API_KEY',
                                  fallback=settings.API_KEY)
-        settings.MAX_LENGTH = p.getint('SERVER', 'MAX_LENGTH',
+        settings.MAX_LENGTH = p.getint('PLAYER', 'MAX_LENGTH',
                                        fallback=settings.MAX_LENGTH)
-        settings.MAX_FILESIZE = p.getint('SERVER', 'MAX_FILESIZE',
+        settings.MAX_FILESIZE = p.getint('PLAYER', 'MAX_FILESIZE',
                                          fallback=settings.MAX_FILESIZE)
-        settings.MIN_SKIP_VOTE = p.getint('SERVER', 'MIN_SKIP_VOTE',
+        settings.MIN_SKIP_VOTE = p.getint('PLAYER', 'MIN_SKIP_VOTE',
                                           fallback=settings.MIN_SKIP_VOTE)
-        settings.MIN_READD_VOTE = p.getint('SERVER', 'MIN_READD_VOTE',
+        settings.MIN_READD_VOTE = p.getint('PLAYER', 'MIN_READD_VOTE',
                                            fallback=settings.MIN_READD_VOTE)
 
     @staticmethod

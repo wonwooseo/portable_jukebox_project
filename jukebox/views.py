@@ -316,7 +316,7 @@ def add_file_item(request):
                 cover_bytes = aptag[0].data
             if cover_bytes:
                 img = Image.open(io.BytesIO(cover_bytes))
-                img.save('/jukebox/static/img/cover_cache/{}.png'
+                img.save('jukebox/static/img/cover_cache/{}.png'
                          .format(title), 'PNG')
                 img.close()
         except stagger.NoTagError:
