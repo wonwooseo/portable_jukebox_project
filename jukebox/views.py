@@ -75,7 +75,14 @@ def now_playing(request):
     if not check_validated_access(request, 'now_playing'):
         request.session.flush()
         return redirect('index')
-    return render(request, 'nowplaying.html')
+    playlist = []
+    # Get list of next songs in playlist
+    # limit max number of items as option?
+    np_pk = ConsumerUtil.get_np_idx()
+    playlist_qs = PlaylistItem.objects.filter(pk__gt=np_pk)
+    for item in playlist_qs:
+        playlist.append((item.title, item.artist, item.type))
+    return render(request, 'nowplaying.html', {'playlist': playlist})
 
 
 def qrcode(request):

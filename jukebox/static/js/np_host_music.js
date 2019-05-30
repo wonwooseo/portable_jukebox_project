@@ -56,6 +56,9 @@ $(document).ready(function() {
                     document.getElementById('player_area').appendChild(html5player);
                 }
                 else {
+                    // Change layout / sizing for YouTube player
+                    document.getElementById('cover').setAttribute('style', 'max-height: 10vh');
+                    document.getElementById('title').setAttribute('class', 'card-title');
                     // load Youtube Iframe API script
                     let tag = document.createElement('script');
                     tag.src = 'https://youtube.com/iframe_api';
@@ -83,9 +86,8 @@ function onYouTubeIframeAPIReady() {
     // replace div with iframe when api is ready
     console.info('IframeAPI ready');
     player = new YT.Player('player_dom', {
-        height: '480',
-        width: '640',
-        origin: window.location.host,
+        height: window.innerHeight / 2,
+        origin: window.location.host.toString(),
         videoId: path,
         events: {
             'onReady': onPlayerReady,

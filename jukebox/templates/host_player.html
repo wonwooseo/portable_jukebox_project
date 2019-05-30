@@ -11,19 +11,17 @@
     <script src="{% static 'js/np_host_music.js' %}"></script>
 </head>
 <body>
-<div style="min-height:100vh">
-    <div id=music_info class="card shadow-lg" style="margin: 2em 1em">
+<div>
+    <div id=music_info class="card shadow-lg" style="margin: 2em 1em; min-height:calc(100vh - 4em)">
         <div class="card-header">
             <h4>Now Playing</h4>
         </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-2 align-self-center">
-                  <img id="cover" src="{% static 'img/default.png' %}" class="card-img">
-                </div>
-                <div class="col-md-10">
-                    <h1 id="title" class="card-title">Title</h1>
-                    <h3 id="artist" class="card-subtitle text-muted">Artist</h3>
+            <div class="media">
+                <img id="cover" src="{% static 'img/default.png' %}" class="mr-3 align-middle" style="max-height: 50vh">
+                <div class="media-body align-middle">
+                    <h1 id="title" class="card-title display-2">Title</h1>
+                    <h4 id="artist" class="card-subtitle text-muted display-4">Artist</h4>
                     <h3 id="album" class="card-text text-muted">Album</h3>
                 </div>
             </div>
@@ -35,27 +33,15 @@
             </div>
             <hr class="my-4">
             <div id="skip_area">
-                <span id="skip_label"><b>Votes for Skip</b></span>
+                <span id="skip_label"><b class="card-title">Votes for Skip</b></span>
                 <span id="skip_count">0</span>
                 <span>/ {{ skip_threshold }}</span>
             </div>
             <div id="readd_area">
-                <span id="readd_label"><b>Votes for Re-add</b></span>
+                <span id="readd_label"><b class="card-title">Votes for Re-add</b></span>
                 <span id="readd_count">0</span>
                 <span>/ {{ readd_threshold }}</span>
             </div>
-        </div>
-    </div>
-    <div class="card shadow-lg" style="margin:2em 1em">
-        <div class="card-header">
-            <h4>Playlist</h4>
-        </div>
-        <div class="card-body">
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">Playlist Item</li>
-                <li class="list-group-item">To be filled</li>
-                <li class="list-group-item">Later on</li>
-            </ul>
         </div>
     </div>
     <div class="card shadow-lg" style="margin:2em 1em">

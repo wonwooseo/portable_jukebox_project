@@ -28,24 +28,29 @@
             </div>
             <hr class="my-4">
             <button id="btn_skip" class="btn btn-primary">
-                Vote to Skip <span id="skip_count" class="badge badge-light">0</span>
+                <span id="skip_btn_txt">Skip</span>
+                <span id="skip_count" class="badge badge-light">0</span>
             </button>
             <button id="btn_readd" class="btn btn-primary">
-                Vote to Re-add <span id="readd_count" class="badge badge-light">0</span>
+                <span id="readd_btn_txt">Re-add</span>
+                <span id="readd_count" class="badge badge-light">0</span>
             </button>
             <hr class="my-4">
             <a href="/add" class="btn btn-success">Add Music to Playlist</a>
         </div>
     </div>
-    <div class="card shadow-lg" style="margin:2em 1em">
+    <div class="card shadow-lg" style="max-height:30em; margin:2em 1em">
         <div class="card-header">
-            <h4>Playlist</h4>
+            <h4>Next Up</h4>
         </div>
-        <div class="card-body">
+        <div class="card-body" style="overflow-y: scroll">
             <ul class="list-group list-group-flush">
-                <li class="list-group-item">Playlist Item</li>
-                <li class="list-group-item">To be filled</li>
-                <li class="list-group-item">Later on</li>
+                {% for item in playlist %}
+                <li class="list-group-item">
+                    <h4 class="card-text">{{ item.0 }}</h4>
+                    <h6 class="text-muted">{{ item.1 }}</h6>
+                </li>
+                {% endfor %}
             </ul>
         </div>
     </div>

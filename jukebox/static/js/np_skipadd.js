@@ -49,7 +49,7 @@ $(document).ready(function() {
             'target': 'skip',
             'action': 'plus'
         }));
-        skipbtn_elem.innerText = 'Voted for Skip';
+        skipbtn_elem.firstElementChild.innerText = 'Voted';
         skipbtn_elem.disabled = true;
     };
 
@@ -59,7 +59,7 @@ $(document).ready(function() {
             'target': 'readd',
             'action': 'plus'
         }));
-        readdbtn_elem.innerText = 'Voted for Re-add';
+        readdbtn_elem.firstElementChild.innerText = 'Voted';
         readdbtn_elem.disabled = true;
     };
 });
