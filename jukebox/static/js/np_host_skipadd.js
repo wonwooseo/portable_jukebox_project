@@ -11,7 +11,9 @@ $(document).ready(function() {
     };
 
     sa_socket.onclose = function(f) {
-        console.error('Skip-add socket closed');
+        $('#socket_close_alert').modal({
+            backdrop: 'static'
+        })
     };
 
     sa_socket.onmessage = function(f) {
