@@ -8,7 +8,7 @@ Project to build a locally-hosted, portable jukebox application based on Django.
     - Settings for minimum votes
 
 ## Core dev env
-- Python 3.7.1
+- Python 3.7
 - Django v2.2.1
 - Django Channels v2.1.7
 - redis (running on docker container)
@@ -50,4 +50,4 @@ Project to build a locally-hosted, portable jukebox application based on Django.
     - find other lightweight options (for production)
     - or manually keep channel names in consumers.py
 - Configure host IP automatically
-- Prevent duplicate votes
+- remove PlaylistItem.playing field

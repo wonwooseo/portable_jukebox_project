@@ -4,8 +4,6 @@ from django.contrib import messages
 from portable_jukebox_project import settings
 from jukebox.models import *
 from jukebox.consumers import ConsumerUtil
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 from PIL import Image
 import io
 import logging.config
@@ -13,7 +11,6 @@ import os
 import mutagen
 import stagger.id3
 import requests
-import json
 
 logging.config.dictConfig(settings.LOGGER_CONFIG)
 logger = logging.getLogger(__name__)
@@ -183,18 +180,9 @@ def add_youtube_item(request):
 
     # add to playlist
     item = PlaylistItem(type='youtube', title=title, link=vid)
-    if not PlaylistItem.objects.filter(playing=True).exists():
-        item.playing = True
+    if not ConsumerUtil.get_playing():
         item.save()
-        # signal /nowplaying that playlist has been updated
-        ConsumerUtil.set_np_idx(item.pk)
-        channel = get_channel_layer()
-        async_to_sync(channel.group_send)('music', {
-                        'type': 'music.event',
-                        'text': json.dumps({
-                            'target': 'skip',  # will make client refresh
-                        }),
-                    })
+        ConsumerUtil.skip_handler()  # initiate skip and notify clients
     else:
         item.save()
     logger.info('Adding music from youtube(id={}) to playlist'.format(vid))
@@ -242,18 +230,9 @@ def add_file_item(request):
         # Add to playlist
         item = PlaylistItem(type='file', title=music.title, artist=music.artist,
                             album=music.album, link=music.filename)
-        if not PlaylistItem.objects.filter(playing=True).exists():
-            item.playing = True
+        if not ConsumerUtil.get_playing():
             item.save()
-            # Signal /nowplaying playlist has been updated
-            ConsumerUtil.set_np_idx(item.pk)
-            channel = get_channel_layer()
-            async_to_sync(channel.group_send)('music', {
-                'type': 'music.event',
-                'text': json.dumps({
-                    'target': 'skip',  # will make client refresh
-                }),
-            })
+            ConsumerUtil.skip_handler()  # initiate skip and notify clients
         else:
             item.save()
         logger.info('Adding music from cache(file={}) '
@@ -336,18 +315,9 @@ def add_file_item(request):
         # Add file to playlist
         plist_item = PlaylistItem(type='file', title=title, artist=artist,
                                   album=album, link=file.name)
-        if not PlaylistItem.objects.filter(playing=True).exists():
-            plist_item.playing = True
+        if not ConsumerUtil.get_playing():
             plist_item.save()
-            # Signal /nowplaying
-            ConsumerUtil.set_np_idx(plist_item.pk)
-            channel = get_channel_layer()
-            async_to_sync(channel.group_send)('music', {
-                'type': 'music.event',
-                'text': json.dumps({
-                    'target': 'skip',  # will make client refresh
-                }),
-            })
+            ConsumerUtil.skip_handler()  # initiate skip and notify clients
         else:
             plist_item.save()
         logger.info('Adding music from upload(file={}) '

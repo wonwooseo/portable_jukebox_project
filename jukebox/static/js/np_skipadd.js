@@ -2,6 +2,7 @@
  * Script to handle websocket events for skip / re-add
  */
 $(document).ready(function() {
+    let idx;
     let sa_socket = new WebSocket('ws://' + window.location.host + '/ws/skipadd/');
 
     sa_socket.onopen = function(f) {
@@ -28,6 +29,7 @@ $(document).ready(function() {
             case 'fetch':
                 let scount_elem = document.getElementById('skip_count');
                 let rcount_elem = document.getElementById('readd_count');
+                idx = msg['idx'];
                 scount_elem.innerText = msg['skip'];
                 rcount_elem.innerText = msg['readd'];
                 if(msg['readd'] === '✔') document.getElementById('btn_readd').disabled = true;
@@ -47,7 +49,8 @@ $(document).ready(function() {
     skipbtn_elem.onclick = function(f) {
         sa_socket.send(JSON.stringify({
             'target': 'skip',
-            'action': 'plus'
+            'action': 'plus',
+            'idx': idx,
         }));
         skipbtn_elem.firstElementChild.innerText = 'Voted';
         skipbtn_elem.disabled = true;
@@ -57,7 +60,8 @@ $(document).ready(function() {
     readdbtn_elem.onclick = function(f) {
         sa_socket.send(JSON.stringify({
             'target': 'readd',
-            'action': 'plus'
+            'action': 'plus',
+            'idx': idx,
         }));
         readdbtn_elem.firstElementChild.innerText = 'Voted';
         readdbtn_elem.disabled = true;

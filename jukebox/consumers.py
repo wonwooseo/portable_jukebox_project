@@ -4,7 +4,6 @@ from channels.generic.websocket import WebsocketConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 import json
-import os
 
 skip_counter = 0  # is this safe?
 readd_counter = 0
@@ -50,31 +49,26 @@ class SkipAddConsumer(WebsocketConsumer):
                     'text': json.dumps({
                         'target': 'fetch',
                         'skip': skip_counter,
-                        'readd': readd_counter
+                        'readd': readd_counter,
+                        'idx': np_idx,  # for sync between consumer and client
                     }),
                 }
             )
         else:
-            if data_json.get('target') == 'skip':
+            if data_json.get('target') == 'skip' and \
+                    data_json.get('idx') == np_idx:
                 skip_counter += 1
                 if skip_counter == settings.MIN_SKIP_VOTE:
-                    # TODO: current item sync between consumer and client?
-                    # when client votes skip for item a,
-                    # consumer might already be in item b,
-                    # thus counting vote for a as vote for b.
                     ConsumerUtil.skip_handler()
                     return
                 counter = skip_counter
-            elif data_json.get('target') == 'readd':
+            elif data_json.get('target') == 'readd' and \
+                    data_json.get('idx') == np_idx:
                 readd_counter += 1
                 if readd_counter == settings.MIN_SKIP_VOTE:
-                    # TODO: current item sync between consumer and client?
-                    # Same issue with skip
-
                     # Copy and insert current item to playlist
                     np_item = PlaylistItem.objects.get(pk=np_idx)
-                    np_item.playing = False
-                    np_item.pk = None
+                    np_item.pk = None  # will newly set id
                     np_item.save()
                     readd_counter = '✔'
                 counter = readd_counter
@@ -111,20 +105,34 @@ class MusicConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         data_json = json.loads(text_data)
-        try:
-            np_item = PlaylistItem.objects.get(playing=True)
-        except PlaylistItem.DoesNotExist:  # no music playing now
-            async_to_sync(self.channel_layer.send)(
-                self.channel_name,
-                {
-                    'type': 'music.event',
-                    'text': json.dumps({
-                        'target': 'notplaying',
-                    }),
-                }
-            )
-            return
         if data_json.get('fetch'):  # new connection; send current music info
+            if not playing:
+                async_to_sync(self.channel_layer.send)(
+                    self.channel_name,
+                    {
+                        'type': 'music.event',
+                        'text': json.dumps({
+                            'target': 'notplaying',
+                        }),
+                    }
+                )
+                return
+            """
+            try:
+                np_item = PlaylistItem.objects.get(playing=True)
+            except PlaylistItem.DoesNotExist:  # no music playing now
+                async_to_sync(self.channel_layer.send)(
+                    self.channel_name,
+                    {
+                        'type': 'music.event',
+                        'text': json.dumps({
+                            'target': 'notplaying',
+                        }),
+                    }
+                )
+                return
+                """
+            np_item = PlaylistItem.objects.get(pk=np_idx)
             if np_item.type == 'file':
                 path = '/static/music_cache/{}'.format(np_item.link)
             else:
@@ -163,19 +171,13 @@ class ConsumerUtil:
         playing, next item as playing, then updates np_idx.
         :return: None
         """
-        global skip_counter, readd_counter
+        global skip_counter, readd_counter, playing
         skip_counter, readd_counter = 0, 0
         channel_layer = get_channel_layer()
-        # TODO: More efficient way of making queries?
-        np_item = PlaylistItem.objects.get(pk=np_idx)
-        np_item.playing = False
-        np_item.save()
         try:
             next_item = PlaylistItem.objects.get(pk=np_idx + 1)
-            next_item.playing = True
             next_item.save()
         except PlaylistItem.DoesNotExist:  # playlist depleted
-            global playing
             playing = False
             async_to_sync(channel_layer.group_send)(
                 'music',
@@ -217,3 +219,11 @@ class ConsumerUtil:
         global playing
         np_idx = new_idx
         playing = True
+
+    @staticmethod
+    def get_playing():
+        """
+        Returns current value of playing.
+        :return: playing: boolean
+        """
+        return playing
