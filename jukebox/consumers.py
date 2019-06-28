@@ -117,21 +117,6 @@ class MusicConsumer(WebsocketConsumer):
                     }
                 )
                 return
-            """
-            try:
-                np_item = PlaylistItem.objects.get(playing=True)
-            except PlaylistItem.DoesNotExist:  # no music playing now
-                async_to_sync(self.channel_layer.send)(
-                    self.channel_name,
-                    {
-                        'type': 'music.event',
-                        'text': json.dumps({
-                            'target': 'notplaying',
-                        }),
-                    }
-                )
-                return
-                """
             np_item = PlaylistItem.objects.get(pk=np_idx)
             if np_item.type == 'file':
                 path = '/static/music_cache/{}'.format(np_item.link)

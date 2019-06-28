@@ -9,4 +9,5 @@ pillow~=6.0.0
 django-allow-cidr~=0.3.1
 mutagen~=1.42.0
 stagger~=1.0.0
+selenium~=3.141
 pypiwin32; sys_platform == 'win32'

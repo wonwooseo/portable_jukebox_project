@@ -13,6 +13,10 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 - Django Channels v2.1.7
 - redis (running on docker container)
 
+## Testing
+- Selenium
+- **WARNING: Tests with django-channels might have issues when running on Windows environment**
+
 ## Blueprint (views)
 - [x] /index
 - [x] /nowplaying
