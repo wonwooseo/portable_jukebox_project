@@ -2,4 +2,5 @@
 env
 .config
 __pycache__/
+chromedriver
 chromedriver.*

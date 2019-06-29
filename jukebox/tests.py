@@ -1,9 +1,11 @@
 from channels.testing import ChannelsLiveServerTestCase
 from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from portable_jukebox_project import settings
 import aioredis
 import asyncio
+import logging
 import time
 
 
@@ -18,6 +20,8 @@ class ClientTests(ChannelsLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        # disable logging
+        logging.disable(logging.CRITICAL)
         # check if redis running
         addr = settings.CHANNEL_LAYERS['default']['CONFIG']['hosts'][0]
         redis_running = asyncio.run(cls.redis_check(addr))
@@ -27,11 +31,15 @@ class ClientTests(ChannelsLiveServerTestCase):
         # get server address (not using localhost)
         cls.host_url = 'http://{}:'.format(settings.HOST_IP)
         # setup webdriver
-        cls.selenium = WebDriver(executable_path='chromedriver')
+        options = Options()
+        options.add_argument('--headless')  # run headless chrome
+        options.add_argument('--window-size=1920x1080')  # set browser size
+        cls.selenium = WebDriver(executable_path='./chromedriver', chrome_options=options)
 
     @classmethod
     def tearDownClass(cls):
         cls.selenium.quit()
+        logging.disable(logging.NOTSET)
         super().tearDownClass()
 
     def setUp(self):
