@@ -91,7 +91,7 @@ def qrcode(request):
     if not check_validated_access(request, 'qrcode'):
         request.session.flush()
         return redirect('index')
-    context = {'address': settings.HOST_IP}  # add port in future?
+    context = {'address': '{}:{}'.format(settings.HOST_IP, request.META['SERVER_PORT'])}
     return render(request, 'qrcode.html', context)
 
 

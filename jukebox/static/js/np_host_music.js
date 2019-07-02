@@ -89,6 +89,7 @@ function onYouTubeIframeAPIReady() {
         height: window.innerHeight / 2,
         origin: window.location.host.toString(),
         videoId: path,
+        origin: 'http://127.0.0.1:8000',
         events: {
             'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange

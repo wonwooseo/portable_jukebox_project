@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import sys
 import channels.apps
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -169,6 +170,9 @@ LOGGER_CONFIG = {
         }
     }
 }
+
+# Checks if testing
+TESTING = 'test' in sys.argv
 
 # Variables to be updated by reading config.
 HOST_IP = '127.0.0.1'

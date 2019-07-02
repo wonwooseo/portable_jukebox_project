@@ -12,8 +12,9 @@ class JukeboxConfig(AppConfig):
     def ready(self):
         self.read_config()
         self.create_qrqode()
-        self.reset_db()
-        self.cache_init()
+        if not settings.TESTING:
+            self.reset_db()
+            self.cache_init()
 
     @staticmethod
     def read_config():

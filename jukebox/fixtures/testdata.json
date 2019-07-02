@@ -1,0 +1,1 @@
+[{"model": "jukebox.musiccacheitem", "pk": 1, "fields": {"title": "Test Whitenoise", "artist": "Test Artist", "album": "Test Album", "length": "0m 45s", "filename": "test_noise.mp3"}}]
