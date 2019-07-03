@@ -172,7 +172,7 @@ LOGGER_CONFIG = {
 }
 
 # Checks if testing
-TESTING = 'test' in sys.argv
+TESTING = 'test' or 'testserver' in sys.argv
 
 # Variables to be updated by reading config.
 HOST_IP = '127.0.0.1'

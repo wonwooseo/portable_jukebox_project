@@ -1,6 +1,7 @@
 .idea
 env
-.config
+config
 __pycache__/
 chromedriver
 chromedriver.*
+db_test.*

@@ -26,12 +26,12 @@ class JukeboxConfig(AppConfig):
         from configparser import ConfigParser
         import os
         from shutil import copyfile
-        if not os.path.isfile('.config'):
-            copyfile('.config_default', '.config')
+        if not os.path.isfile('config'):
+            copyfile('.config_default', 'config')
             logger.info('Created config file using defaults')
             return
         p = ConfigParser()
-        p.read('.config')
+        p.read('config')
         # if config has missing section/options, default will be used
         settings.HOST_IP = p.get('SERVER', 'HOST_IP',
                                  fallback=settings.HOST_IP)

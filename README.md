@@ -15,7 +15,6 @@ Project to build a locally-hosted, portable jukebox application based on Django.
 
 ## Testing
 - Selenium
-- **WARNING: Tests with django-channels might have issues when running on Windows environment**
 
 ## Blueprint (views)
 - [x] /index
