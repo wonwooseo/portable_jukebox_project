@@ -1,7 +1,6 @@
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
-from portable_jukebox_project import settings
 import unittest
 import aioredis
 import asyncio
@@ -31,13 +30,15 @@ class ClientSeleniumTests(unittest.TestCase):
         checker.copy_test_music()
         # setup webdriver
         cls.drv_options = Options()
-        #cls.drv_options.add_argument('--headless')  # run headless chrome
-        #cls.drv_options.add_argument('--window-size=1920x1080')  # set browser size
+        cls.drv_options.add_argument('--headless')  # run headless chrome
+        cls.drv_options.add_argument('--window-size=1920x1080')  # set browser size
         cls.selenium = WebDriver(executable_path='./chromedriver', chrome_options=cls.drv_options)
+        cls.selenium2 = WebDriver(executable_path='./chromedriver', chrome_options=cls.drv_options)
 
     @classmethod
     def tearDownClass(cls):
         cls.selenium.quit()
+        cls.selenium2.quit()
         TestUtilities().clear_test_music()
         logging.disable(logging.NOTSET)
         super().tearDownClass()
@@ -184,12 +185,14 @@ class ClientSeleniumTests(unittest.TestCase):
 
     def test_15_readd_music(self):
         self._add_one_music()
+        time.sleep(1)  # wait for websocket update
         btn = self.selenium.find_element_by_css_selector('#btn_readd')
         btn.click()
         self.selenium.implicitly_wait(5)  # wait for javascript DOM edit
         btn = self.selenium.find_element_by_css_selector('#btn_readd')
         self.assertTrue(btn.get_attribute('disabled'))
         self.selenium.refresh()
+        time.sleep(1)  # wait for websocket update
         self.selenium.implicitly_wait(5)  # wait for javascript DOM edit
         btn = self.selenium.find_element_by_css_selector('#btn_readd')
         self.assertTrue(btn.get_attribute('disabled'))
@@ -197,6 +200,7 @@ class ClientSeleniumTests(unittest.TestCase):
         self.selenium.find_element_by_css_selector('body > div:nth-child(2) > div.card-body > ul > li')
         # cleanup
         self._skip_music()
+        time.sleep(1)
         self._skip_music()
 
     def test_16_other_client_add_music(self):
@@ -213,13 +217,26 @@ class ClientSeleniumTests(unittest.TestCase):
         self.assertIn(artist_h, desc)
 
     def test_17_other_client_skip_music(self):
-        # TODO: use 2 WebDrivers, check music skips on parked driver
         self.selenium2.get(self.host)
-        self.assertTrue(True, True)
+        time.sleep(1)  # wait for update
+        # currently shows music added on previous testcase
+        self.selenium2.find_element_by_css_selector('#btn_skip').click()
+        time.sleep(1)  # wait for update
+        title = self.selenium.find_element_by_css_selector('#title').text
+        self.assertEqual('No music playing now..', title)
 
     def test_18_other_client_readd_music(self):
-        # TODO: use 2 WebDrivers, check readd button state change on parked driver, refresh and check next up section
-        self.assertTrue(True, True)
+        # add music
+        self.selenium2.find_element_by_css_selector('#add_music').click()
+        self.selenium2.find_element_by_css_selector('#add_file').click()
+        li = self.selenium2.find_elements_by_class_name('list-group-item')[0]  # xpath / selector not consistent
+        li.find_element_by_tag_name('button').click()
+        # click readd on /nowplaying
+        self.selenium2.get(self.host)
+        self.selenium2.find_element_by_css_selector('#btn_readd').click()
+        time.sleep(1)  # wait for update
+        btn = self.selenium.find_element_by_css_selector('#btn_readd')
+        self.assertTrue(btn.get_attribute('disabled'))
 
     def _get_qrcode_page(self):
         """
@@ -257,7 +274,6 @@ class ClientSeleniumTests(unittest.TestCase):
         li = self.selenium.find_elements_by_class_name('list-group-item')[0]  # xpath / selector not consistent
         li.find_element_by_tag_name('button').click()
         self.selenium.find_element_by_css_selector('body > div > a').click()
-        self.selenium.implicitly_wait(5)
 
     def _skip_music(self):
         """
@@ -268,14 +284,10 @@ class ClientSeleniumTests(unittest.TestCase):
         btn.click()
 
     def _start_new_driver(self):
-        self.selenium2 = WebDriver(executable_path='./chromedriver', chrome_options=self.drv_options)
         self.selenium2.get(self.host)
         form = self.selenium2.find_element_by_name('password')
         form.send_keys(1234)
         form.send_keys(Keys.ENTER)
-
-    def _quit_new_driver(self):
-        self.selenium2.quit()
 
 # TODO: class HostSeleniumTests
 

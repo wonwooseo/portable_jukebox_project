@@ -27,6 +27,7 @@ $(document).ready(function() {
                 break;
             case 'readd':
                 document.getElementById('readd_count').innerText = msg['count'];
+                if(msg['count'] === '✔') document.getElementById('btn_readd').disabled = true;
                 break;
             case 'fetch':
                 let scount_elem = document.getElementById('skip_count');
