@@ -8,10 +8,6 @@
 # You can change settings from .config after that.
 #
 [SERVER]
-# Enter host machine's IP address here.
-# If wrong address is provided, nobody will be able to find jukebox!
-HOST_IP = 127.0.0.1
-
 # Key that host(admin) will use to access host-specific features.
 HOST_PASSWORD = admin
 

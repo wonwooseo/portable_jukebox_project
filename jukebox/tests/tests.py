@@ -2,10 +2,17 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 import unittest
+import socket
 import aioredis
 import asyncio
 import logging
 import time
+
+
+soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+soc.connect(('8.8.8.8', 80))
+GLOBAL_HOST = soc.getsockname()[0]
+soc.close()
 
 
 class ClientSeleniumTests(unittest.TestCase):
@@ -15,7 +22,7 @@ class ClientSeleniumTests(unittest.TestCase):
     """
 
     # TODO: automatic ip detection
-    host = 'http://192.168.33.90:8000'  # for getting client view
+    host = 'http://{}:8001'.format(GLOBAL_HOST)  # for getting client view
 
     @classmethod
     def setUpClass(cls):

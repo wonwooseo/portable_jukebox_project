@@ -10,11 +10,25 @@ class JukeboxConfig(AppConfig):
     name = 'jukebox'
 
     def ready(self):
+        self.set_host()
         self.read_config()
         self.create_qrqode()
         if not settings.TESTING:
             self.reset_db()
             self.cache_init()
+
+    @staticmethod
+    def set_host():
+        """
+        Detects ip address of primary internet interface and sets host address.
+        :return: None
+        """
+        import socket
+        soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        soc.connect(('8.8.8.8', 80))  # try creating connection to external destination
+        settings.HOST_IP = soc.getsockname()[0]
+        logger.info('Host IP: {}'.format(settings.HOST_IP))
+        soc.close()
 
     @staticmethod
     def read_config():
@@ -33,8 +47,6 @@ class JukeboxConfig(AppConfig):
         p = ConfigParser()
         p.read('config')
         # if config has missing section/options, default will be used
-        settings.HOST_IP = p.get('SERVER', 'HOST_IP',
-                                 fallback=settings.HOST_IP)
         settings.HOST_PASSWORD = p.get('SERVER', 'HOST_PASSWORD',
                                        fallback=settings.HOST_PASSWORD)
         settings.USE_PASSWORD = p.get('SERVER', 'USE_PASSWORD',

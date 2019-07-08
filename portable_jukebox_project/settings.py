@@ -153,7 +153,7 @@ LOGGER_CONFIG = {
     'disable_existing_loggers': False,
     'formatters': {
         'console': {
-            'format': '[%(asctime)s][%(levelname)s] %(funcName)s: %(message)s'
+            'format': '[%(asctime)s][%(levelname)s] %(message)s'
         }
     },
     'handlers': {
@@ -172,7 +172,7 @@ LOGGER_CONFIG = {
 }
 
 # Checks if testing
-TESTING = 'test' or 'testserver' in sys.argv
+TESTING = 'test' in sys.argv or 'testserver' in sys.argv
 
 # Variables to be updated by reading config.
 HOST_IP = '127.0.0.1'
