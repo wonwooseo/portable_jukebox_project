@@ -26,7 +26,7 @@ def index(request):
     # Access from host machine
     if request.META.get('REMOTE_ADDR') == '127.0.0.1':  # is this safe?
         return render(request, 'host_player.html',
-                      {'address': settings.HOST_IP,
+                      {'address': '{}:{}'.format(settings.HOST_IP, request.META['SERVER_PORT']),
                        'skip_threshold': settings.MIN_SKIP_VOTE,
                        'readd_threshold': settings.MIN_READD_VOTE})
     # Access from other machines

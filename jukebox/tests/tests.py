@@ -17,7 +17,6 @@ soc.close()
 class ClientSeleniumTests(unittest.TestCase):
     """
     Selenium test cases simulating client actions.
-    WARNING: ChannelsLiveServerTestCase has confirmed issues when running on Windows environment.
     """
 
     host = 'http://{}:8001'.format(GLOBAL_HOST)  # for getting client view
@@ -51,8 +50,9 @@ class ClientSeleniumTests(unittest.TestCase):
     def test_01_login(self):
         self.selenium.get(self.host)
         form = self.selenium.find_element_by_name('password')
-        form.send_keys(1234)
+        form.send_keys(1234)  # TODO: read from config or settings
         form.send_keys(Keys.ENTER)
+        time.sleep(1)  # wait for update
         self.assertEqual('Now Playing', self.selenium.title)
         # No music playing; skip and re-add buttons should be disabled
         skip_btn = self.selenium.find_element_by_css_selector('#btn_skip')
@@ -65,7 +65,7 @@ class ClientSeleniumTests(unittest.TestCase):
         btn.click()
         self.assertTrue(self.selenium.current_url.endswith('/qrcode'))
         img = self.selenium.find_element_by_css_selector('body > div.jumbotron.shadow-lg > img')
-        self.assertTrue('QR Code', img.get_attribute('alt'))
+        self.assertEqual('QR Code', img.get_attribute('alt'))
         url = self.selenium.find_element_by_css_selector('body > div.jumbotron.shadow-lg > h5 > a')
         self.assertIn(self.host, url.text)
 
@@ -239,6 +239,10 @@ class ClientSeleniumTests(unittest.TestCase):
         time.sleep(1)  # wait for update
         btn = self.selenium.find_element_by_css_selector('#btn_readd')
         self.assertTrue(btn.get_attribute('disabled'))
+        # cleanup
+        self._skip_music()
+        time.sleep(1)
+        self._skip_music()
 
     def _get_qrcode_page(self):
         """
@@ -291,7 +295,109 @@ class ClientSeleniumTests(unittest.TestCase):
         form.send_keys(1234)
         form.send_keys(Keys.ENTER)
 
-# TODO: class HostSeleniumTests
+
+class HostSeleniumTests(unittest.TestCase):
+    """
+    Selenium test cases simulating host actions.
+    """
+
+    client_addr = 'http://{}:8001'.format(GLOBAL_HOST)  # for getting client view
+    host_addr = 'http://127.0.0.1:8001'  # for getting host view
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # TEST ENVIRONMENT CHECK
+        checker = TestUtilities()
+        # 1) check if redis is running
+        checker.check_redis()
+        # 2) check if music cache is not empty
+        checker.copy_test_music()
+        # setup webdriver
+        cls.drv_options = Options()
+        cls.drv_options.add_argument('--headless')  # run headless chrome
+        cls.drv_options.add_argument('--window-size=1920x1080')  # set browser size
+        cls.selenium_h = WebDriver(executable_path='./chromedriver', chrome_options=cls.drv_options)
+        cls.selenium_c = WebDriver(executable_path='./chromedriver', chrome_options=cls.drv_options)
+
+    @classmethod
+    def tearDownClass(cls):
+        import os
+        cls.selenium_h.quit()
+        cls.selenium_c.quit()
+        os.remove('jukebox/static/music_cache/test_noise.mp3')
+        super().tearDownClass()
+
+    def setUp(self):
+        self.selenium_h.get(self.host_addr)
+
+    def test_01_host_player(self):
+        self.assertEqual('Now Playing (Host)', self.selenium_h.title)
+        time.sleep(1)  # wait for update
+        title = self.selenium_h.find_element_by_css_selector('#title').text
+        self.assertEqual('No music playing now..', title)
+        self.selenium_h.find_element_by_css_selector('#skip_label')
+        self.selenium_h.find_element_by_css_selector('#readd_label')
+        img = self.selenium_h.find_element_by_css_selector('body > div > div:nth-child(2) > div.card-body > img')
+        self.assertEqual('QR Code', img.get_attribute('alt'))
+        link = self.selenium_h.find_element_by_css_selector('body > div > div:nth-child(2) > div.card-body > h5 > a')
+        self.assertIn(self.client_addr, link.text)
+
+    def test_02_client_add_youtube_music(self):
+        self._start_client_driver()
+        pass
+
+    def test_03_client_add_cache_music(self):
+        self._get_client_add_page('file')
+        li = self.selenium_c.find_elements_by_class_name('list-group-item')[0]  # xpath / selector not consistent
+        desc = li.find_element_by_tag_name('b').text
+        li.find_element_by_tag_name('button').click()
+        self.selenium_c.find_element_by_css_selector('body > div > a').click()
+        # client now at /nowplaying
+        time.sleep(1)  # wait for music info updates by websocket
+        title_h = self.selenium_h.find_element_by_css_selector('#title').text.strip()
+        self.assertIn(title_h, desc)
+        # cleanup
+        self._skip_music()
+
+    def test_04_client_skips_music(self):
+        pass
+
+    def test_05_client_readds_music(self):
+        pass
+
+    def _get_client_add_page(self, dest=None):
+        """
+        Sends Client WebDriver to add, add_youtube or add_file page. Should be called at /nowplaying.
+        :param dest: youtube: reaches /add_youtube
+                     file: reaches /add_file
+                     None: reaches /add (Default)
+        :return: None
+        """
+        elem = self.selenium_c.find_element_by_css_selector('#add_music')
+        elem.click()
+        if dest == 'youtube':
+            elem = self.selenium_c.find_element_by_css_selector('#add_youtube')
+            elem.click()
+        elif dest == 'file':
+            elem = self.selenium_c.find_element_by_css_selector('#add_file')
+            elem.click()
+        else:
+            pass
+
+    def _skip_music(self):
+        """
+        Skips music on client's /nowplaying.
+        :return: None
+        """
+        btn = self.selenium_c.find_element_by_css_selector('#btn_skip')
+        btn.click()
+
+    def _start_client_driver(self):
+        self.selenium_c.get(self.client_addr)
+        form = self.selenium_c.find_element_by_name('password')
+        form.send_keys(1234)
+        form.send_keys(Keys.ENTER)
 
 
 class TestUtilities:
