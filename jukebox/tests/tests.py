@@ -5,7 +5,6 @@ import unittest
 import socket
 import aioredis
 import asyncio
-import logging
 import time
 
 
@@ -21,14 +20,11 @@ class ClientSeleniumTests(unittest.TestCase):
     WARNING: ChannelsLiveServerTestCase has confirmed issues when running on Windows environment.
     """
 
-    # TODO: automatic ip detection
     host = 'http://{}:8001'.format(GLOBAL_HOST)  # for getting client view
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # disable logging
-        logging.disable(logging.CRITICAL)
         # TEST ENVIRONMENT CHECK
         checker = TestUtilities()
         # 1) check if redis is running
@@ -47,7 +43,6 @@ class ClientSeleniumTests(unittest.TestCase):
         cls.selenium.quit()
         cls.selenium2.quit()
         TestUtilities().clear_test_music()
-        logging.disable(logging.NOTSET)
         super().tearDownClass()
 
     def setUp(self):

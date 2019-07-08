@@ -13,9 +13,11 @@ class JukeboxConfig(AppConfig):
         self.set_host()
         self.read_config()
         self.create_qrqode()
-        if not settings.TESTING:
-            self.reset_db()
-            self.cache_init()
+        if settings.TESTING:
+            logging.disable(logging.CRITICAL)
+            return
+        self.reset_db()
+        self.cache_init()
 
     @staticmethod
     def set_host():
